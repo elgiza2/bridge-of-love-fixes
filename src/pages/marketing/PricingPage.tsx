@@ -254,7 +254,7 @@ const PricingPage = () => {
       const checkoutUrl = data?.url || data?.checkout_url;
       if (checkoutUrl) {
         markCheckoutOpened(interval);
-        window.location.href = checkoutUrl;
+        openCheckoutUrl(checkoutUrl);
       } else throw new Error(data?.error || "Checkout failed");
 
     } catch (e: any) {
