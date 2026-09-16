@@ -29,6 +29,12 @@ export default function SecondMonthOfferCard({ tier = "pro" }: Props) {
   const payNow = async () => {
     if (loading) return;
     setLoading(true);
+    trackTikTokFunnelEvent("InitiateCheckout", {
+      contentId: `${tier}:second_month`,
+      contentName: `${tier} second month offer`,
+      currency: "USD",
+    });
+
     try {
       const {
         data: { session },
