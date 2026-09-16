@@ -134,26 +134,48 @@ async function sha256(value: string) {
     .join("");
 }
 
+/** TikTok wants E.164 without "+" or separators. */
+function normalizePhone(raw: string) {
+  const digits = raw.replace(/[^\d]/g, "");
+  if (!digits) return "";
+  if (digits.startsWith("00")) return digits.slice(2);
+  // Local Egyptian numbers (01xxxxxxxxx) carry no country code.
+  if (digits.startsWith("01") && digits.length === 11) return `2${digits}`;
+  return digits;
+}
+
 async function sendTikTokPurchase(input: {
   eventId: string;
+  contentId: string;
   value: number;
   currency: string;
   productName: string;
   userId: string | null;
+  email?: string | null;
+  phone?: string | null;
 }) {
   const token = Deno.env.get("TIKTOK_EVENTS_ACCESS_TOKEN")?.trim();
   if (!token) return;
 
   const user: Record<string, string> = {};
+  let email = input.email?.trim() || "";
+  let phone = input.phone?.trim() || "";
+
   if (input.userId) {
     user.external_id = await sha256(input.userId);
     try {
       const { data } = await admin.auth.admin.getUserById(input.userId);
-      if (data?.user?.email) user.email = await sha256(data.user.email);
+      if (!email && data?.user?.email) email = data.user.email;
+      const meta = (data?.user?.user_metadata ?? {}) as Record<string, unknown>;
+      if (!phone) phone = String(data?.user?.phone || meta.phone || meta.phone_number || "");
     } catch {
-      /* email is optional */
+      /* identifiers are optional */
     }
   }
+
+  if (email) user.email = await sha256(email);
+  const normalizedPhone = phone ? normalizePhone(phone) : "";
+  if (normalizedPhone) user.phone = await sha256(normalizedPhone);
 
   try {
     const response = await fetch(TIKTOK_ENDPOINT, {
@@ -170,11 +192,13 @@ async function sendTikTokPurchase(input: {
             user,
             properties: {
               content_type: "product",
+              content_id: input.contentId,
+              content_name: input.productName,
               value: Number.isFinite(input.value) ? input.value : undefined,
               currency: input.currency.toUpperCase(),
               contents: [
                 {
-                  content_id: input.eventId,
+                  content_id: input.contentId,
                   content_name: input.productName,
                   quantity: 1,
                   price: Number.isFinite(input.value) ? input.value : undefined,
