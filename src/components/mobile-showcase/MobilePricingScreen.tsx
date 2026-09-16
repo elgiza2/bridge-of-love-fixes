@@ -273,8 +273,14 @@ export default function MobilePricingScreen({
   // The $1 / 3-day trial is not a box of its own: while the account has never
   // used it, it *is* the monthly offer. It only shows when the catalog actually
   // has a sellable trial row, so the price on screen is always chargeable.
+  // The trial is sold through the local (Kashier) gateway only, so it is shown
+  // to Arab-region visitors exclusively.
+  const [arabRegion, setArabRegion] = useState(false);
+  useEffect(() => {
+    setArabRegion(isArabRegion());
+  }, []);
   const trialEligible =
-    useIntroTrialEligible() && !alreadySubscribed && trialAvailable(catalog);
+    arabRegion && useIntroTrialEligible() && !alreadySubscribed && trialAvailable(catalog);
   const trialActive = trialEligible && !isYearly;
   const trialUsd = trialEntry?.usd ?? 1;
   const trialDays = trialEntry?.trialDays || 3;
