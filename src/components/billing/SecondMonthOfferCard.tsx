@@ -13,6 +13,7 @@ import { SECOND_MONTH_OFFER } from "@/data/pricingData";
 import { isEgMode } from "@/lib/egMode";
 import { isArabBilling } from "@/lib/payRegion";
 import { trackTikTokFunnelEvent } from "@/lib/analytics/tiktokPixel";
+import { openCheckoutUrl } from "@/lib/openCheckout";
 
 interface Props {
   /** Tier the user just subscribed to. */
@@ -65,7 +66,7 @@ export default function SecondMonthOfferCard({ tier = "pro" }: Props) {
       const checkoutUrl = data?.url || data?.checkout_url;
       if (checkoutUrl) {
         setClaimed(true);
-        window.location.href = checkoutUrl;
+        openCheckoutUrl(checkoutUrl);
       } else {
         throw new Error(data?.error || "Checkout failed");
       }

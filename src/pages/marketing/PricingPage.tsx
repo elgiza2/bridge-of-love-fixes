@@ -40,6 +40,7 @@ import {
 import { useBillingCatalog, priceFor, trialAvailable } from "@/lib/billingCatalog";
 import { brandText, getZoneBrand } from "@/lib/zoneBrand";
 import { isEgMode } from "@/lib/egMode";
+import { openCheckoutUrl } from "@/lib/openCheckout";
 import { isArabBilling, isArabRegion } from "@/lib/payRegion";
 import { useUserLang } from "@/lib/authI18n";
 import { useIntroTrialEligible } from "@/lib/introTrial";
@@ -254,7 +255,7 @@ const PricingPage = () => {
       const checkoutUrl = data?.url || data?.checkout_url;
       if (checkoutUrl) {
         markCheckoutOpened(interval);
-        window.location.href = checkoutUrl;
+        openCheckoutUrl(checkoutUrl);
       } else throw new Error(data?.error || "Checkout failed");
 
     } catch (e: any) {
