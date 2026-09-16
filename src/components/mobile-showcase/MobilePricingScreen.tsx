@@ -241,17 +241,17 @@ export default function MobilePricingScreen({
 
   const trialCopy = isAr
     ? {
-        label: "الشهر الأول — 3 أيام بـ 1$",
-        badge: "عرض البداية",
-        unit: "/ 3 أيام",
-        fine: `3 أيام بـ 1$ فقط — 3 صور متقدمة يوميًا. بعدها ${INTRO_PRICE}$ للشهر الأول ثم ${pro.monthlyPrice}$ شهريًا. إلغاء في أي وقت.`,
+        label: "الشهر الأول",
+        badge: "3 أيام بـ 1$",
+        unit: "",
+        fine: `3 أيام بـ 1$ فقط. بعدها ${INTRO_PRICE}$ للشهر الأول ثم ${pro.monthlyPrice}$ شهريًا. إلغاء في أي وقت.`,
         cta: "ابدأ 3 أيام بـ 1$",
       }
     : {
-        label: "Monthly — 3 days for $1",
-        badge: "INTRO OFFER",
-        unit: "/ 3 days",
-        fine: `$1 for 3 days — 3 premium images daily. Then $${INTRO_PRICE} first month, $${pro.monthlyPrice}/month after. Cancel anytime.`,
+        label: "First month",
+        badge: "3 days for $1",
+        unit: "",
+        fine: `$1 for 3 days. Then $${INTRO_PRICE} first month, $${pro.monthlyPrice}/month after. Cancel anytime.`,
         cta: "Start 3 days for $1",
       };
 
@@ -419,22 +419,17 @@ export default function MobilePricingScreen({
                   <span
                     className={`flex items-baseline gap-2 tabular-nums ${isAr ? "flex-row-reverse" : ""} justify-start`}
                   >
-                    {/* The local currency is the price, not a footnote: the
-                        dollar amount moves to the small secondary line. */}
                     <span className={`${compact ? "text-[15px]" : "text-[16px]"} font-semibold`} style={{ color: c.text }}>
                       {localPrice(opt.price) ?? `$${opt.price}`}
                     </span>
-                    <span className="text-[11px]" style={{ color: c.muted }}>
-                      {opt.unit}
-                    </span>
+                    {opt.unit ? (
+                      <span className="text-[11px]" style={{ color: c.muted }}>
+                        {opt.unit}
+                      </span>
+                    ) : null}
                     <span className="text-[11.5px] line-through" style={{ color: c.faint }}>
                       {localPrice(opt.strike) ?? `$${opt.strike}`}
                     </span>
-                    {localPrice(opt.price) ? (
-                      <span className="text-[11px]" style={{ color: c.faint }}>
-                        ${opt.price}
-                      </span>
-                    ) : null}
                   </span>
                 </span>
               </button>
