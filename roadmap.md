@@ -37,6 +37,7 @@
 - React 19 nested-router warning removed by seeding browser history before React mounts.
 
 ## Open
+- [ ] Report the actual 48-person funnel: visit, signup start/completion, payment page/method, Vodafone Cash, and proof/order completion.
 - [ ] Track each page view's visitor country.
 - [ ] Redesign the four first-run slides with modest Arab-region imagery, distinct rising color transitions, and repaired slide-four text.
 - On mobile, Enter inserts a newline instead of sending; only the Send button sends.
