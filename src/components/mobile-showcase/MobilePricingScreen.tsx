@@ -151,15 +151,16 @@ export default function MobilePricingScreen({
       icon: MegsyFeatureIcon,
       text: isYearly
         ? isAr
-          ? "240 رصيد Megsy كل شهر"
-          : "240 Megsy Credits every month"
+          ? `${proCredits} رصيد Megsy كل شهر`
+          : `${proCredits} Megsy Credits every month`
         : isAr
-          ? "240 رصيد Megsy مع الاشتراك"
-          : "240 Megsy Credits with your plan",
+          ? `${proCredits} رصيد Megsy مع الاشتراك`
+          : `${proCredits} Megsy Credits with your plan`,
     };
 
     return [head, ...base];
-  }, [isAr, isYearly]);
+  }, [isAr, isYearly, proCredits]);
+
 
 
   // Win-back: the user opened checkout, came back without paying.
@@ -459,7 +460,7 @@ export default function MobilePricingScreen({
                     className={`flex items-baseline gap-2 tabular-nums ${isAr ? "flex-row-reverse" : ""} justify-start`}
                   >
                     <span className={`${compact ? "text-[15px]" : "text-[16px]"} font-semibold`} style={{ color: c.text }}>
-                      {localPrice(opt.price) ?? `$${opt.price}`}
+                      {localPrice(opt.price, opt.entry) ?? `$${opt.price}`}
                     </span>
                     {opt.unit ? (
                       <span className="text-[11px]" style={{ color: c.muted }}>
@@ -467,7 +468,7 @@ export default function MobilePricingScreen({
                       </span>
                     ) : null}
                     <span className="text-[11.5px] line-through" style={{ color: c.faint }}>
-                      {localPrice(opt.strike) ?? `$${opt.strike}`}
+                      {localPrice(opt.strike, opt.strikeEntry) ?? `$${opt.strike}`}
                     </span>
                   </span>
                 </span>
