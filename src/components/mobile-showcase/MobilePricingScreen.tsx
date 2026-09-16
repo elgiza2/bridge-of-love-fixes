@@ -326,7 +326,7 @@ export default function MobilePricingScreen({
 
         {/* Title */}
         <h1
-          className={`mps-rise text-center font-normal leading-[1.2] tracking-[-0.015em] ${
+          className={`mps-rise text-start font-normal leading-[1.2] tracking-[-0.015em] ${
             compact ? "mt-2 text-[22px]" : "mt-2.5 text-[25px]"
           }`}
           style={{ animationDelay: "60ms", fontFamily: '"Instrument Serif", Georgia, serif' }}
