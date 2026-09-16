@@ -396,8 +396,8 @@ const PricingPage = () => {
             ) : null}
 
             {/* Plans */}
-            <section id="plans-grid" className="mt-10 grid gap-5 sm:grid-cols-2">
-              {PLANS.filter((p) => p.tier === "pro" || p.tier === "elite").map((plan) => {
+            <section id="plans-grid" className="mx-auto mt-10 grid w-full max-w-md gap-5">
+              {PLANS.filter((p) => p.tier === "pro").map((plan) => {
                 const fallbackPrice = getDisplayPrice(plan, isYearly);
                 const catalogEntry = priceFor(
                   catalog,
