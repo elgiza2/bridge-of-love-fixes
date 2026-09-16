@@ -40,7 +40,7 @@ import {
 import { useBillingCatalog, priceFor, trialAvailable } from "@/lib/billingCatalog";
 import { brandText, getZoneBrand } from "@/lib/zoneBrand";
 import { isEgMode } from "@/lib/egMode";
-import { isArabBilling } from "@/lib/payRegion";
+import { isArabBilling, isArabRegion } from "@/lib/payRegion";
 import { useUserLang } from "@/lib/authI18n";
 import { useIntroTrialEligible } from "@/lib/introTrial";
 import { trackTikTokFunnelEvent } from "@/lib/analytics/tiktokPixel";
