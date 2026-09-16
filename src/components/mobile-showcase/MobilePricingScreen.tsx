@@ -127,6 +127,10 @@ export default function MobilePricingScreen({
   // A subscriber must never be told to "upgrade" to the plan they already own.
   const { plan } = useUserPlan();
   const alreadySubscribed = plan === "pro" || plan === "max" || plan === "elite";
+  // Catalog is the single source of truth for prices and credits.
+  const { entries: catalog } = useBillingCatalog();
+  const proCredits = priceFor(catalog, "pro", "monthly", {})?.credits ?? 240;
+
 
   // Always exactly 6 rows so the card height (and the CTA position) never
   // shifts when the billing interval changes — only the first row's copy does.
