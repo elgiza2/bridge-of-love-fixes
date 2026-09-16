@@ -29,6 +29,7 @@ type PurchasePayload = {
   ttclid?: string;
   ttp?: string;
   email?: string;
+  phone?: string;
   externalId?: string;
   testEventCode?: string;
 };
@@ -39,6 +40,16 @@ async function sha256(value: string): Promise<string> {
   return Array.from(new Uint8Array(digest))
     .map((byte) => byte.toString(16).padStart(2, "0"))
     .join("");
+}
+
+/** TikTok wants E.164 digits with no "+" or separators. */
+function normalizePhone(raw: string): string {
+  const digits = raw.replace(/[^\d]/g, "");
+  if (!digits) return "";
+  if (digits.startsWith("00")) return digits.slice(2);
+  // Local Egyptian numbers (01xxxxxxxxx) carry no country code.
+  if (digits.startsWith("01") && digits.length === 11) return `2${digits}`;
+  return digits;
 }
 
 function json(body: unknown, status = 200): Response {
@@ -82,13 +93,18 @@ Deno.serve(async (request) => {
   if (data.ttclid) user.ttclid = data.ttclid;
   if (data.ttp) user.ttp = data.ttp;
   if (data.email) user.email = await sha256(data.email);
+  const phone = data.phone ? normalizePhone(data.phone) : "";
+  if (phone) user.phone = await sha256(phone);
   if (data.externalId) user.external_id = await sha256(data.externalId);
 
+  const contentId = data.contentId || data.eventId;
   const properties: Record<string, unknown> = {
     content_type: "product",
+    content_id: contentId,
+    content_name: data.productName,
     contents: [
       {
-        content_id: data.contentId || data.eventId,
+        content_id: contentId,
         content_name: data.productName,
         quantity: 1,
         price: data.value,
