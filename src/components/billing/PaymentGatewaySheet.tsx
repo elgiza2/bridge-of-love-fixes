@@ -42,10 +42,34 @@ interface Props {
   labels?: Partial<Record<PayOption, string>>;
 }
 
-const ROWS: Array<{ id: PayOption; label: string }> = [
-  { id: "global", label: "Global" },
-  { id: "local", label: "Local" },
-  { id: "wallets", label: "E-Wallets" },
+const ROWS: Array<{
+  id: PayOption;
+  label: string;
+  labelAr: string;
+  caption: string;
+  captionAr: string;
+}> = [
+  {
+    id: "global",
+    label: "International card",
+    labelAr: "بطاقة دولية",
+    caption: "Paid in USD",
+    captionAr: "الدفع بالدولار",
+  },
+  {
+    id: "local",
+    label: "Visa or Mastercard",
+    labelAr: "فيزا أو ماستركارد",
+    caption: "Local bank card",
+    captionAr: "بطاقة بنك محلي",
+  },
+  {
+    id: "wallets",
+    label: "Mobile wallet",
+    labelAr: "محفظة موبايل",
+    caption: "Vodafone Cash and others",
+    captionAr: "فودافون كاش وغيرها",
+  },
 ];
 
 function PaymentGatewaySheetImpl({
@@ -61,12 +85,9 @@ function PaymentGatewaySheetImpl({
   useIsLightTheme();
   const lang = useUserLang();
   const isArabic = lang.startsWith("ar");
-  const resolvedTitle = title === "Choose payment method" && isArabic ? "اختر طريقة الدفع" : title;
+  const resolvedTitle = title === "Choose payment method" && isArabic ? "طريقة الدفع" : title;
   const resolvedSubtitle =
-    subtitle === "Pick an option." && isArabic ? "اختر الطريقة المناسبة لك." : subtitle;
-  const localizedLabels: Partial<Record<PayOption, string>> = isArabic
-    ? { global: "دفع دولي", local: "بطاقة بنكية", wallets: "محفظة إلكترونية" }
-    : {};
+    subtitle === "Pick an option." && isArabic ? "اختر الطريقة اللي تناسبك." : subtitle;
 
   useEffect(() => {
     if (!open) return;
@@ -81,46 +102,44 @@ function PaymentGatewaySheetImpl({
 
   if (!open) return null;
 
+  const visible = ROWS.filter((row) => !options || options.includes(row.id));
+
   return (
     <div
       dir={isArabic ? "rtl" : "ltr"}
-      className="fixed inset-0 z-[100] flex items-end justify-center bg-foreground/25 sm:items-center"
+      className="fixed inset-0 z-[100] flex items-end justify-center bg-foreground/30 backdrop-blur-[2px] sm:items-center"
     >
       <div className="absolute inset-0 pointer-events-auto" onClick={onClose} />
       <motion.div
         data-plus-menu
         onClick={(e) => e.stopPropagation()}
-        initial={{ opacity: 0, y: 10, scale: 0.985 }}
+        initial={{ opacity: 0, y: 14, scale: 0.99 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 10, scale: 0.985 }}
-        transition={{ duration: 0.16, ease: [0.22, 0.9, 0.3, 1] }}
-        className="pointer-events-auto relative z-[101] flex w-full flex-col overflow-y-auto rounded-t-3xl border border-border/60 bg-background px-5 pb-[calc(env(safe-area-inset-bottom,0px)+18px)] text-foreground shadow-xl sm:max-w-[400px] sm:rounded-3xl md:max-h-[70vh]"
+        exit={{ opacity: 0, y: 14, scale: 0.99 }}
+        transition={iosSpring}
+        className="pointer-events-auto relative z-[101] flex w-full flex-col overflow-y-auto rounded-t-[28px] border border-border/50 bg-background px-6 pb-[calc(env(safe-area-inset-bottom,0px)+22px)] text-foreground shadow-2xl sm:max-w-[392px] sm:rounded-[28px] md:max-h-[70vh]"
         style={{ fontFamily: mobileFont }}
       >
-        <div className="sm:hidden pt-2.5 pb-2 flex items-center justify-center shrink-0">
-          <div className="h-1 w-9 rounded-full bg-muted-foreground/25" />
+        <div className="sm:hidden pt-3 pb-1 flex items-center justify-center shrink-0">
+          <div className="h-1 w-10 rounded-full bg-muted-foreground/20" />
         </div>
 
-        <div className="pt-2 pb-4">
-          <p className="text-[17px] font-semibold leading-tight">{resolvedTitle}</p>
-          <p className="mt-1.5 text-[13px] leading-snug text-muted-foreground">
+        <div className="pt-5 pb-5 text-center sm:pt-6">
+          <p className="text-[19px] font-semibold tracking-[-0.01em] leading-tight">
+            {resolvedTitle}
+          </p>
+          <p className="mt-2 text-[13.5px] leading-relaxed text-muted-foreground">
             {resolvedSubtitle}
           </p>
         </div>
 
-        <div className="flex flex-col gap-2.5 pb-1">
-          {ROWS.filter((row) => !options || options.includes(row.id)).map((row) => {
+        <div className="flex flex-col overflow-hidden rounded-2xl border border-border/60">
+          {visible.map((row, i) => {
             const isLoading = loading === row.id;
             const disabled = loading !== null && !isLoading;
             const Icon = row.id === "wallets" ? Smartphone : CreditCard;
-            const tone =
-              row.id === "wallets"
-                ? "border-emerald-500/20 bg-emerald-500/[0.06] hover:bg-emerald-500/[0.12]"
-                : "border-blue-500/20 bg-blue-500/[0.06] hover:bg-blue-500/[0.12]";
-            const iconTone =
-              row.id === "wallets"
-                ? "text-emerald-600 dark:text-emerald-400"
-                : "text-blue-600 dark:text-blue-400";
+            const label = labels?.[row.id] ?? (isArabic ? row.labelAr : row.label);
+            const caption = isArabic ? row.captionAr : row.caption;
             return (
               <Button
                 data-no-neo
@@ -129,18 +148,27 @@ function PaymentGatewaySheetImpl({
                 disabled={disabled || isLoading}
                 onClick={() => onSelect(row.id)}
                 variant="ghost"
-                aria-label={labels?.[row.id] ?? localizedLabels[row.id] ?? row.label}
-                className={`h-14 w-full justify-start gap-3 rounded-xl border px-3 text-start text-foreground shadow-none transition-colors ${tone}`}
+                aria-label={label}
+                className={`h-[68px] w-full justify-start gap-3.5 rounded-none border-0 bg-transparent px-4 text-start text-foreground shadow-none transition-colors hover:bg-muted/50 disabled:opacity-40 ${
+                  i > 0 ? "border-t border-border/50" : ""
+                }`}
               >
-                <Icon className={`h-[18px] w-[18px] shrink-0 ${iconTone}`} strokeWidth={1.75} />
-                <span className="flex-1 text-[15px] font-semibold leading-tight text-foreground">
-                  {labels?.[row.id] ?? localizedLabels[row.id] ?? row.label}
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted/70">
+                  <Icon className="h-[17px] w-[17px] text-foreground/70" strokeWidth={1.6} />
+                </span>
+                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span className="truncate text-[15px] font-medium leading-tight text-foreground">
+                    {label}
+                  </span>
+                  <span className="truncate text-[12.5px] font-normal leading-tight text-muted-foreground">
+                    {caption}
+                  </span>
                 </span>
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" />
                 ) : (
                   <ChevronRight
-                    className="h-4 w-4 shrink-0 text-muted-foreground/60 rtl:rotate-180"
+                    className="h-4 w-4 shrink-0 text-muted-foreground/45 rtl:rotate-180"
                     strokeWidth={1.75}
                   />
                 )}
@@ -148,6 +176,14 @@ function PaymentGatewaySheetImpl({
             );
           })}
         </div>
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-4 h-11 w-full rounded-full text-[14px] font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+        >
+          {isArabic ? "إلغاء" : "Cancel"}
+        </button>
       </motion.div>
     </div>
   );
@@ -155,3 +191,4 @@ function PaymentGatewaySheetImpl({
 
 const PaymentGatewaySheet = memo(PaymentGatewaySheetImpl);
 export default PaymentGatewaySheet;
+
