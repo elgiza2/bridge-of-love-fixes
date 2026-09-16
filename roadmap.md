@@ -37,6 +37,8 @@
 - React 19 nested-router warning removed by seeding browser history before React mounts.
 
 ## Open
+- [ ] Track each page view's visitor country.
+- [ ] Redesign the four first-run slides with modest Arab-region imagery, distinct rising color transitions, and repaired slide-four text.
 - On mobile, Enter inserts a newline instead of sending; only the Send button sends.
 - The Learning mode chip needs horizontal scrolling in the mobile mode bar to be reachable.
 - MCP / Integrations and Files were not exercised end to end in this pass.
