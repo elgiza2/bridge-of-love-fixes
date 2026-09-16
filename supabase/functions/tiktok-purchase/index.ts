@@ -57,8 +57,13 @@ Deno.serve(async (request) => {
     return json({ ok: false, reason: "invalid_value" }, 400);
   }
 
+  // TikTok scores a web event far lower without ip + user_agent, and can drop
+  // it entirely, so both are attached from the request itself when possible.
+  const forwarded = (request.headers.get("x-forwarded-for") || "").split(",")[0].trim();
+
   const user: Record<string, string> = {};
   if (data.userAgent) user.user_agent = data.userAgent;
+  if (forwarded) user.ip = forwarded;
   if (data.ttclid) user.ttclid = data.ttclid;
   if (data.ttp) user.ttp = data.ttp;
   if (data.email) user.email = await sha256(data.email);
