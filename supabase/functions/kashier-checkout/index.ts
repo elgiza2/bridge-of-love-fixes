@@ -112,10 +112,10 @@ Deno.serve(async (request) => {
     let row = await resolveRow(tier, interval, { trial, winback });
     if (!row) return json({ error: "This plan isn't available yet." }, 400);
 
-    // Some offers (trial, win-back) only exist locally. Rather than dead-end the
-    // buyer, fall back to the standard row for the same tier and interval.
+    // Win-back offers may fall back to the standard row, but a trial must never
+    // silently become a full-price charge.
     let productId = String(payload.product_id ?? "").trim() || row.dodo_product_id || "";
-    if (!productId) {
+    if (!productId && !trial) {
       const base = await catalogRow(tier, interval);
       if (base?.dodo_product_id) {
         row = base;
@@ -124,7 +124,11 @@ Deno.serve(async (request) => {
     }
     if (!productId) {
       return json(
-        { error: "This option isn't available for card payment yet. Pick another plan." },
+        {
+          error: trial
+            ? "The trial offer is only available with local payment right now."
+            : "This option isn't available for card payment yet. Pick another plan.",
+        },
         400,
       );
     }
