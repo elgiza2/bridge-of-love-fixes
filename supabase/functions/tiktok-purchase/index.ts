@@ -88,7 +88,7 @@ Deno.serve(async (request) => {
     content_type: "product",
     contents: [
       {
-        content_id: data.eventId,
+        content_id: data.contentId || data.eventId,
         content_name: data.productName,
         quantity: 1,
         price: data.value,
