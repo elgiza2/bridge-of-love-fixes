@@ -32,7 +32,7 @@ import {
 import { AppRoutes } from "@/routes-app/AppRoutes";
 import { applyTheme } from "@/lib/theme";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
-import { loadTikTokPixel } from "@/lib/analytics/tiktokPixel";
+import { loadTikTokPixel, trackTikTokFunnelEvent } from "@/lib/analytics/tiktokPixel";
 
 /** Watches background jobs / agent runs and notifies the user when they finish. */
 const BackgroundJobNotifier = lazyWithRetry(
@@ -159,6 +159,21 @@ const useAuthSession = () => {
       if (userId && (event === "SIGNED_IN" || event === "TOKEN_REFRESHED")) {
         void claimPendingReferral();
       }
+
+      // TikTok funnel: CompleteRegistration, once per account, only for an
+      // account created in the last 10 minutes (a real sign-up, not a login).
+      if (userId && event === "SIGNED_IN") {
+        const createdAt = session?.user?.created_at ? Date.parse(session.user.created_at) : NaN;
+        if (Number.isFinite(createdAt) && Date.now() - createdAt < 10 * 60 * 1000) {
+          trackTikTokFunnelEvent("CompleteRegistration", {
+            eventId: `signup-${userId}`,
+            contentId: "account",
+            contentName: "Account created",
+            once: true,
+          });
+        }
+      }
+
 
       setCurrentUserId(userId);
     });

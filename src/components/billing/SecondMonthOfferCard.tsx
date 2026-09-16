@@ -12,6 +12,7 @@ import { invokeFunction } from "@/lib/supabaseFunction";
 import { SECOND_MONTH_OFFER } from "@/data/pricingData";
 import { isEgMode } from "@/lib/egMode";
 import { isArabBilling } from "@/lib/payRegion";
+import { trackTikTokFunnelEvent } from "@/lib/analytics/tiktokPixel";
 
 interface Props {
   /** Tier the user just subscribed to. */
@@ -28,6 +29,12 @@ export default function SecondMonthOfferCard({ tier = "pro" }: Props) {
   const payNow = async () => {
     if (loading) return;
     setLoading(true);
+    trackTikTokFunnelEvent("InitiateCheckout", {
+      contentId: `${tier}:second_month`,
+      contentName: `${tier} second month offer`,
+      currency: "USD",
+    });
+
     try {
       const {
         data: { session },

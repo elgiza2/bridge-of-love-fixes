@@ -43,6 +43,7 @@ import { isEgMode } from "@/lib/egMode";
 import { isArabBilling } from "@/lib/payRegion";
 import { useUserLang } from "@/lib/authI18n";
 import { useIntroTrialEligible } from "@/lib/introTrial";
+import { trackTikTokFunnelEvent } from "@/lib/analytics/tiktokPixel";
 import { cn } from "@/lib/utils";
 import { useUserPlan } from "@/hooks/useUserPlan";
 
@@ -55,6 +56,15 @@ const FAQ_LIMIT = 4;
 const PricingPage = () => {
   const navigate = useNavigate();
   usePrefetchOnIdle(["/auth", "/chat"], 1500);
+
+  // TikTok funnel: viewing the plans is the ViewContent step.
+  useEffect(() => {
+    trackTikTokFunnelEvent("ViewContent", {
+      contentId: "pricing",
+      contentName: "Pricing plans",
+    });
+  }, []);
+
 
   const [isYearly, setIsYearly] = useState(false);
   const [loadingTier, setLoadingTier] = useState<PlanTier | null>(null);
@@ -145,6 +155,14 @@ const PricingPage = () => {
   ) => {
     if (loadingTier) return;
     const interval: "monthly" | "yearly" = opts.interval ?? (isYearly ? "yearly" : "monthly");
+
+    // TikTok funnel: the intent to pay, before the gateway takes over.
+    trackTikTokFunnelEvent("InitiateCheckout", {
+      contentId: `${tier}:${interval}`,
+      contentName: `${tier} ${interval}`,
+      currency: "USD",
+    });
+
 
     let {
       data: { session },

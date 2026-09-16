@@ -7,8 +7,19 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+const ALLOWED_EVENTS = new Set([
+  "CompletePayment",
+  "ViewContent",
+  "InitiateCheckout",
+  "AddToCart",
+  "CompleteRegistration",
+]);
+
 type PurchasePayload = {
+  /** Defaults to CompletePayment so existing callers keep working. */
+  event?: string;
   eventId: string;
+  contentId?: string;
   value?: number;
   currency?: string;
   productName?: string;
@@ -58,8 +69,11 @@ Deno.serve(async (request) => {
     return json({ ok: false, reason: "invalid_value" }, 400);
   }
 
+  const eventName = data.event && ALLOWED_EVENTS.has(data.event) ? data.event : "CompletePayment";
+
   // TikTok scores a web event far lower without ip + user_agent, and can drop
   // it entirely, so both are attached from the request itself when possible.
+
   const forwarded = (request.headers.get("x-forwarded-for") || "").split(",")[0].trim();
 
   const user: Record<string, string> = {};
@@ -74,7 +88,7 @@ Deno.serve(async (request) => {
     content_type: "product",
     contents: [
       {
-        content_id: data.eventId,
+        content_id: data.contentId || data.eventId,
         content_name: data.productName,
         quantity: 1,
         price: data.value,
@@ -93,7 +107,7 @@ Deno.serve(async (request) => {
       test_event_code: data.testEventCode || undefined,
       data: [
         {
-          event: "CompletePayment",
+          event: eventName,
           event_time: Math.floor(Date.now() / 1000),
           event_id: data.eventId,
           user,

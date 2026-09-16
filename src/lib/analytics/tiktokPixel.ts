@@ -162,6 +162,74 @@ export function trackTikTokCompletePayment({
 
 const firedPayments = new Set<string>();
 
+/**
+ * The rest of the funnel TikTok asks for (ViewContent, InitiateCheckout,
+ * CompleteRegistration). Each one is sent from the browser pixel and from the
+ * Events API with the same event_id so TikTok deduplicates the two copies.
+ */
+export type TikTokFunnelEvent = "ViewContent" | "InitiateCheckout" | "CompleteRegistration";
+
+const firedFunnelEvents = new Set<string>();
+
+export function trackTikTokFunnelEvent(
+  event: TikTokFunnelEvent,
+  opts: {
+    /** Stable id so the browser and server copies deduplicate. */
+    eventId?: string;
+    contentId?: string;
+    contentName?: string;
+    value?: number;
+    currency?: string;
+    /** Fire at most once per browser (used for registration). */
+    once?: boolean;
+  } = {},
+) {
+  if (typeof window === "undefined") return;
+
+  const eventId = opts.eventId || `${event}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  const guardKey = `megsy_ttq_${event}:${opts.eventId || "session"}`;
+
+  if (firedFunnelEvents.has(guardKey)) return;
+  try {
+    const store = opts.once ? window.localStorage : window.sessionStorage;
+    if (store.getItem(guardKey) === "1") return;
+    store.setItem(guardKey, "1");
+  } catch {}
+  firedFunnelEvents.add(guardKey);
+
+  const properties: Record<string, unknown> = { content_type: "product" };
+  if (opts.contentId) properties.content_id = opts.contentId;
+  if (opts.contentName) properties.content_name = opts.contentName;
+  if (typeof opts.value === "number" && Number.isFinite(opts.value)) properties.value = opts.value;
+  if (opts.currency) properties.currency = opts.currency.toUpperCase();
+
+  loadTikTokPixel();
+  window.ttq?.track?.(event, properties, { event_id: eventId });
+
+  void supabase.auth.getUser().then(({ data: { user } }) =>
+    supabase.functions
+      .invoke("tiktok-purchase", {
+        body: {
+          event,
+          eventId,
+          value: typeof opts.value === "number" && Number.isFinite(opts.value) ? opts.value : undefined,
+          currency: opts.currency ? opts.currency.toUpperCase() : undefined,
+          productName: opts.contentName || undefined,
+          contentId: opts.contentId || undefined,
+          url: window.location.href,
+          referrer: document.referrer || undefined,
+          userAgent: navigator.userAgent,
+          email: user?.email || undefined,
+          externalId: user?.id || undefined,
+          ttclid: readCookie("ttclid") || undefined,
+          ttp: readCookie("_ttp") || undefined,
+        },
+      })
+      .catch(() => undefined),
+  );
+}
+
+
 function readCookie(name: string) {
   try {
     const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
