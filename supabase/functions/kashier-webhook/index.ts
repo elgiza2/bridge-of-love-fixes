@@ -100,9 +100,93 @@ Deno.serve(async (request) => {
     })
     .eq("order_id", orderId)
     .eq("status", "pending")
-    .select("id, status")
+    .select("id, status, amount, currency, credits, plan, user_id")
     .maybeSingle();
 
   if (error) return json({ error: error.message }, 500);
+
+  // The browser copy of CompletePayment only fires when the buyer actually
+  // lands back on the success page. This server copy is authoritative and
+  // shares the same event_id, so TikTok deduplicates the two.
+  if (updated && updated.status === "paid") {
+    await sendTikTokPurchase({
+      eventId: orderId,
+      value: Number(updated.amount),
+      currency: String(updated.currency || "EGP"),
+      productName: updated.plan ? `${updated.plan} Plan` : `${updated.credits} MC top-up`,
+      userId: updated.user_id as string | null,
+    });
+  }
+
   return json({ ok: true, order_id: orderId, status: updated?.status ?? "unchanged" });
 });
+
+const TIKTOK_PIXEL_ID = "DAKS6DRC77UES9754TBG";
+const TIKTOK_ENDPOINT = "https://business-api.tiktok.com/open_api/v1.3/event/track/";
+
+async function sha256(value: string) {
+  const bytes = new TextEncoder().encode(value.trim().toLowerCase());
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function sendTikTokPurchase(input: {
+  eventId: string;
+  value: number;
+  currency: string;
+  productName: string;
+  userId: string | null;
+}) {
+  const token = Deno.env.get("TIKTOK_EVENTS_ACCESS_TOKEN")?.trim();
+  if (!token) return;
+
+  const user: Record<string, string> = {};
+  if (input.userId) {
+    user.external_id = await sha256(input.userId);
+    try {
+      const { data } = await admin.auth.admin.getUserById(input.userId);
+      if (data?.user?.email) user.email = await sha256(data.user.email);
+    } catch {
+      /* email is optional */
+    }
+  }
+
+  try {
+    const response = await fetch(TIKTOK_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Access-Token": token },
+      body: JSON.stringify({
+        event_source: "web",
+        event_source_id: TIKTOK_PIXEL_ID,
+        data: [
+          {
+            event: "CompletePayment",
+            event_time: Math.floor(Date.now() / 1000),
+            event_id: input.eventId,
+            user,
+            properties: {
+              content_type: "product",
+              value: Number.isFinite(input.value) ? input.value : undefined,
+              currency: input.currency.toUpperCase(),
+              contents: [
+                {
+                  content_id: input.eventId,
+                  content_name: input.productName,
+                  quantity: 1,
+                  price: Number.isFinite(input.value) ? input.value : undefined,
+                },
+              ],
+            },
+          },
+        ],
+      }),
+    });
+    const text = await response.text();
+    if (!response.ok) console.error(`TikTok Events API failed [${response.status}]: ${text}`);
+    else console.log(`TikTok Events API accepted ${input.eventId}: ${text}`);
+  } catch (err) {
+    console.error("TikTok Events API request threw", err);
+  }
+}
