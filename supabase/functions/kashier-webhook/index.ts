@@ -110,10 +110,13 @@ Deno.serve(async (request) => {
   if (updated && nextStatus === "paid") {
     await sendTikTokPurchase({
       eventId: orderId,
+      contentId: updated.plan ? `plan:${updated.plan}` : `credits:${updated.credits}`,
       value: Number(updated.amount),
       currency: String(updated.currency || "EGP"),
       productName: updated.plan ? `${updated.plan} Plan` : `${updated.credits} MC top-up`,
       userId: updated.user_id as string | null,
+      email: (data.customerEmail ?? null) as string | null,
+      phone: (data.customerPhone ?? null) as string | null,
     });
   }
 
