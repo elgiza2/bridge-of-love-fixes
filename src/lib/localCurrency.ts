@@ -129,11 +129,47 @@ export function detectLocalMoney(): Money | null {
   return country ? (CURRENCY_BY_COUNTRY[country] ?? null) : null;
 }
 
-/** Currency for the visitor, using the IP country when available. */
+const FX_KEY = "megsy_fx_rates";
+
+/** Live USD rates from the edge, cached for the session. */
+async function liveRates(): Promise<Record<string, number> | null> {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(FX_KEY);
+    if (raw) return JSON.parse(raw) as Record<string, number>;
+  } catch {
+    // ignore
+  }
+  if (typeof fetch === "undefined") return null;
+  try {
+    const res = await fetch("/api/public/fx", { headers: { accept: "application/json" } });
+    if (!res.ok) return null;
+    const body = (await res.json()) as { rates?: Record<string, number> | null };
+    if (!body?.rates) return null;
+    try {
+      sessionStorage.setItem(FX_KEY, JSON.stringify(body.rates));
+    } catch {
+      // ignore
+    }
+    return body.rates;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Currency for the visitor, using the IP country and the live exchange rate
+ * when both are available. Falls back to the built-in table.
+ */
 export async function resolveLocalMoney(): Promise<Money | null> {
   const country = await resolveCountry();
-  return country ? (CURRENCY_BY_COUNTRY[country] ?? null) : null;
+  const base = country ? (CURRENCY_BY_COUNTRY[country] ?? null) : null;
+  if (!base) return null;
+  const rates = await liveRates();
+  const live = rates?.[base.code];
+  return live && Number.isFinite(live) && live > 0 ? { code: base.code, rate: live } : base;
 }
+
 
 export type { Money };
 

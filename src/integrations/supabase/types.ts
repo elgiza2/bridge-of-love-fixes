@@ -1685,6 +1685,57 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_catalog: {
+        Row: {
+          active: boolean
+          base_interval: string
+          created_at: string
+          credits: number
+          dodo_product_id: string | null
+          egp_price: number | null
+          id: string
+          interval: string
+          kashier_sku: string | null
+          sort: number
+          tier: string
+          trial_days: number
+          updated_at: string
+          usd_price: number
+        }
+        Insert: {
+          active?: boolean
+          base_interval: string
+          created_at?: string
+          credits?: number
+          dodo_product_id?: string | null
+          egp_price?: number | null
+          id?: string
+          interval: string
+          kashier_sku?: string | null
+          sort?: number
+          tier: string
+          trial_days?: number
+          updated_at?: string
+          usd_price: number
+        }
+        Update: {
+          active?: boolean
+          base_interval?: string
+          created_at?: string
+          credits?: number
+          dodo_product_id?: string | null
+          egp_price?: number | null
+          id?: string
+          interval?: string
+          kashier_sku?: string | null
+          sort?: number
+          tier?: string
+          trial_days?: number
+          updated_at?: string
+          usd_price?: number
+        }
+        Relationships: []
+      }
       billing_skus: {
         Row: {
           active: boolean

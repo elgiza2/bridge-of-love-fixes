@@ -21,19 +21,26 @@ import { useIntroTrialEligible } from "@/lib/introTrial";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import { getDisplayPrice, getPlan, type PlanTier } from "@/data/pricingData";
 import {
+  useBillingCatalog,
+  priceFor,
+  trialAvailable,
+  type CatalogEntry,
+} from "@/lib/billingCatalog";
+import {
   INTRO_PRICE,
-  WINBACK_PRICE,
-  WINBACK_YEARLY_PRICE,
   hasAbandonedCheckout,
 } from "@/lib/pricingOffers";
+
 
 function MegsyFeatureIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return <MegsyStar className={className ?? "h-5 w-5"} />;
 }
 
 /**
- * "50 EGP" for a dollar amount, from the device's own country. Resolved after
- * mount so the first paint matches the server markup.
+ * "50 EGP" for a dollar amount, from the visitor's own country and the live
+ * exchange rate. Resolved after mount so the first paint matches the server
+ * markup. Egyptian visitors see the exact EGP amount from the catalog — the
+ * same number Kashier charges — instead of a converted estimate.
  */
 function useLocalPrice() {
   const [money, setMoney] = useState<ReturnType<typeof detectLocalMoney>>(null);
@@ -47,8 +54,23 @@ function useLocalPrice() {
       alive = false;
     };
   }, []);
-  return (usd: number) => formatLocalAmount(usd, money);
+  return (usd: number, entry?: CatalogEntry | null) => {
+    if (money?.code === "EGP" && entry?.egp) {
+      try {
+        return new Intl.NumberFormat(undefined, {
+          style: "currency",
+          currency: "EGP",
+          maximumFractionDigits: 0,
+        }).format(entry.egp);
+      } catch {
+        return `${entry.egp} EGP`;
+      }
+    }
+    return formatLocalAmount(usd, money);
+  };
+
 }
+
 
 
 function useCompactHeight() {
@@ -105,6 +127,10 @@ export default function MobilePricingScreen({
   // A subscriber must never be told to "upgrade" to the plan they already own.
   const { plan } = useUserPlan();
   const alreadySubscribed = plan === "pro" || plan === "max" || plan === "elite";
+  // Catalog is the single source of truth for prices and credits.
+  const { entries: catalog } = useBillingCatalog();
+  const proCredits = priceFor(catalog, "pro", "monthly", {})?.credits ?? 240;
+
 
   // Always exactly 6 rows so the card height (and the CTA position) never
   // shifts when the billing interval changes — only the first row's copy does.
@@ -129,15 +155,16 @@ export default function MobilePricingScreen({
       icon: MegsyFeatureIcon,
       text: isYearly
         ? isAr
-          ? "240 رصيد Megsy كل شهر"
-          : "240 Megsy Credits every month"
+          ? `${proCredits} رصيد Megsy كل شهر`
+          : `${proCredits} Megsy Credits every month`
         : isAr
-          ? "240 رصيد Megsy مع الاشتراك"
-          : "240 Megsy Credits with your plan",
+          ? `${proCredits} رصيد Megsy مع الاشتراك`
+          : `${proCredits} Megsy Credits with your plan`,
     };
 
     return [head, ...base];
-  }, [isAr, isYearly]);
+  }, [isAr, isYearly, proCredits]);
+
 
 
   // Win-back: the user opened checkout, came back without paying.
@@ -150,9 +177,17 @@ export default function MobilePricingScreen({
   const monthly = getDisplayPrice(pro, false);
   const yearly = getDisplayPrice(pro, true);
 
-  const monthlyPrice = winback ? WINBACK_PRICE : monthly.price;
-  const yearlyPrice = winback ? WINBACK_YEARLY_PRICE : yearly.price;
+  // Catalog rows for each billing option.
+
+  const monthlyEntry = priceFor(catalog, "pro", "monthly", { winback });
+  const yearlyEntry = priceFor(catalog, "pro", "yearly", { winback });
+  const trialEntry = priceFor(catalog, "pro", "monthly", { trial: true });
+  const monthlyBaseEntry = priceFor(catalog, "pro", "monthly", {});
+
+  const monthlyPrice = monthlyEntry?.usd ?? monthly.price;
+  const yearlyPrice = yearlyEntry?.usd ?? yearly.price;
   const monthlyOff = Math.round((1 - monthlyPrice / pro.monthlyPrice) * 100);
+
 
   const t = isAr
     ? {
@@ -234,25 +269,29 @@ export default function MobilePricingScreen({
       };
 
   // The $1 / 3-day trial is not a box of its own: while the account has never
-  // used it, it *is* the monthly offer. After it is used the same box shows the
-  // $7 first month instead, and the trial never comes back.
-  const trialEligible = useIntroTrialEligible() && !alreadySubscribed;
+  // used it, it *is* the monthly offer. It only shows when the catalog actually
+  // has a sellable trial row, so the price on screen is always chargeable.
+  const trialEligible =
+    useIntroTrialEligible() && !alreadySubscribed && trialAvailable(catalog);
   const trialActive = trialEligible && !isYearly;
+  const trialUsd = trialEntry?.usd ?? 1;
+  const trialDays = trialEntry?.trialDays || 3;
+  const introUsd = monthlyBaseEntry?.usd ?? INTRO_PRICE;
 
   const trialCopy = isAr
     ? {
         label: "الشهر الأول",
-        badge: "3 أيام بـ 1$",
+        badge: `${trialDays} أيام بـ ${trialUsd}$`,
         unit: "",
-        fine: `3 أيام بـ 1$ فقط. بعدها ${INTRO_PRICE}$ للشهر الأول ثم ${pro.monthlyPrice}$ شهريًا. إلغاء في أي وقت.`,
-        cta: "ابدأ 3 أيام بـ 1$",
+        fine: `${trialDays} أيام بـ ${trialUsd}$ فقط. بعدها ${introUsd}$ للشهر الأول ثم ${pro.monthlyPrice}$ شهريًا. إلغاء في أي وقت.`,
+        cta: `ابدأ ${trialDays} أيام بـ ${trialUsd}$`,
       }
     : {
         label: "First month",
-        badge: "3 days for $1",
+        badge: `${trialDays} days for $${trialUsd}`,
         unit: "",
-        fine: `$1 for 3 days. Then $${INTRO_PRICE} first month, $${pro.monthlyPrice}/month after. Cancel anytime.`,
-        cta: "Start 3 days for $1",
+        fine: `$${trialUsd} for ${trialDays} days. Then $${introUsd} first month, $${pro.monthlyPrice}/month after. Cancel anytime.`,
+        cta: `Start ${trialDays} days for $${trialUsd}`,
       };
 
   const options = [
@@ -261,8 +300,10 @@ export default function MobilePricingScreen({
       yearly: false,
       label: trialEligible ? trialCopy.label : t.monthly,
       badge: trialEligible ? trialCopy.badge : t.introBadge,
-      price: trialEligible ? 1 : monthlyPrice,
-      strike: trialEligible ? INTRO_PRICE : monthly.strike,
+      price: trialEligible ? trialUsd : monthlyPrice,
+      entry: trialEligible ? trialEntry : monthlyEntry,
+      strike: trialEligible ? introUsd : monthly.strike,
+      strikeEntry: trialEligible ? monthlyBaseEntry : null,
       unit: trialEligible ? trialCopy.unit : t.perMonth,
     },
     {
@@ -271,9 +312,12 @@ export default function MobilePricingScreen({
       label: t.yearly,
       badge: t.yearlyBadge,
       price: yearlyPrice,
+      entry: yearlyEntry,
       strike: yearly.strike,
+      strikeEntry: null,
       unit: t.perYear,
     },
+
   ] as const;
 
   return (
@@ -420,7 +464,7 @@ export default function MobilePricingScreen({
                     className={`flex items-baseline gap-2 tabular-nums ${isAr ? "flex-row-reverse" : ""} justify-start`}
                   >
                     <span className={`${compact ? "text-[15px]" : "text-[16px]"} font-semibold`} style={{ color: c.text }}>
-                      {localPrice(opt.price) ?? `$${opt.price}`}
+                      {localPrice(opt.price, opt.entry) ?? `$${opt.price}`}
                     </span>
                     {opt.unit ? (
                       <span className="text-[11px]" style={{ color: c.muted }}>
@@ -428,7 +472,7 @@ export default function MobilePricingScreen({
                       </span>
                     ) : null}
                     <span className="text-[11.5px] line-through" style={{ color: c.faint }}>
-                      {localPrice(opt.strike) ?? `$${opt.strike}`}
+                      {localPrice(opt.strike, opt.strikeEntry) ?? `$${opt.strike}`}
                     </span>
                   </span>
                 </span>

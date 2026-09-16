@@ -19,16 +19,48 @@ function json(body: unknown, status = 200) {
   });
 }
 
-const SKU_TABLE: Record<
-  string,
-  { plan: string; amount: number; credits: number; trialDays?: number }
-> = {
-  plan_pro_m_first: { plan: "pro", amount: 249, credits: 1000 },
-  plan_pro_m_trial: { plan: "pro", amount: 49, credits: 1000, trialDays: 3 },
-  plan_pro_m: { plan: "pro", amount: 499, credits: 1000 },
-  plan_elite_m: { plan: "elite", amount: 999, credits: 3000 },
-  plan_elite_m_first: { plan: "elite", amount: 499, credits: 3000 },
-};
+interface CatalogRow {
+  tier: string;
+  interval: string;
+  base_interval: string;
+  usd_price: number;
+  egp_price: number | null;
+  credits: number;
+  dodo_product_id: string | null;
+  kashier_sku: string | null;
+  trial_days: number;
+}
+
+/** Same rule the pricing page applies, kept in one place on both sides. */
+function catalogSlot(
+  interval: "monthly" | "yearly",
+  opts: { trial?: boolean; winback?: boolean },
+): string {
+  if (interval === "yearly") return opts.winback ? "yearly_winback" : "yearly";
+  if (opts.trial) return "monthly_trial";
+  return opts.winback ? "monthly_winback" : "monthly_intro";
+}
+
+async function catalogRow(tier: string, slot: string): Promise<CatalogRow | null> {
+  const { data } = await admin
+    .from("billing_catalog")
+    .select("*")
+    .eq("tier", tier)
+    .eq("interval", slot)
+    .eq("active", true)
+    .maybeSingle();
+  return (data as CatalogRow | null) ?? null;
+}
+
+/** Resolve the row for a choice, falling back to the plain interval row. */
+async function resolveRow(
+  tier: string,
+  interval: "monthly" | "yearly",
+  opts: { trial?: boolean; winback?: boolean },
+): Promise<CatalogRow | null> {
+  const slot = catalogSlot(interval, opts);
+  return (await catalogRow(tier, slot)) ?? (await catalogRow(tier, interval));
+}
 
 async function hmacHex(secret: string, message: string) {
   const key = await crypto.subtle.importKey(
@@ -61,25 +93,15 @@ Deno.serve(async (request) => {
     return json({ error: "invalid json" }, 400);
   }
 
+  const tier = String(payload.tier ?? "pro").toLowerCase();
+  const interval: "monthly" | "yearly" =
+    String(payload.interval ?? "monthly").toLowerCase() === "yearly" ? "yearly" : "monthly";
+  const trial = payload.trial === true || payload.free_trial === true;
+  const winback = payload.winback === true || payload.offer === "second_month";
+  const provider = String(payload.provider ?? "kashier").toLowerCase();
+
   // ---- Dodo Payments (global cards) ----------------------------------------
-  // Each plan must resolve to its OWN Dodo product, otherwise every checkout
-  // ends up on the same (yearly) price.
-  if (String(payload.provider ?? "") === "dodo") {
-    const tier = String(payload.tier ?? "pro").toLowerCase();
-    const interval =
-      String(payload.interval ?? "monthly").toLowerCase() === "yearly" ? "yearly" : "monthly";
-    const trial = payload.trial === true || payload.free_trial === true;
-    const winback = payload.winback === true || payload.offer === "second_month";
-
-    const slot =
-      interval === "yearly"
-        ? winback
-          ? "yearly_winback"
-          : "yearly"
-        : winback
-          ? "monthly_winback"
-          : "monthly_intro";
-
+  if (provider === "dodo") {
     const apiKey = (
       Deno.env.get("DODO_PAYMENTS_API_KEY") ||
       Deno.env.get("DODO_API_KEY") ||
@@ -87,34 +109,29 @@ Deno.serve(async (request) => {
     ).trim();
     if (!apiKey) return json({ error: "Dodo is not configured" }, 503);
 
-    const trialProduct = (Deno.env.get("DODO_TRIAL_PRODUCT_ID") || "").trim();
-    let productId = String(payload.product_id ?? "").trim();
-    if (trial && trialProduct) productId = trialProduct;
-    if (!productId) {
-      const { data: productRow } = await admin
-        .from("dodo_products")
-        .select("product_id")
-        .eq("tier", tier)
-        .eq("interval", slot)
-        .eq("active", true)
-        .maybeSingle();
-      productId = productRow?.product_id ?? "";
-    }
-    if (!productId) {
-      const { data: fallbackRow } = await admin
-        .from("dodo_products")
-        .select("product_id")
-        .eq("tier", tier)
-        .eq("interval", interval)
-        .eq("active", true)
-        .maybeSingle();
-      productId = fallbackRow?.product_id ?? "";
-    }
-    if (!productId) return json({ error: "This plan isn't available yet." }, 400);
+    let row = await resolveRow(tier, interval, { trial, winback });
+    if (!row) return json({ error: "This plan isn't available yet." }, 400);
 
-    const baseCredits = tier === "elite" ? 3000 : 1000;
-    const credits = interval === "yearly" ? baseCredits * 12 : baseCredits;
-    const trialDays = trial && !trialProduct ? 3 : 0;
+    // Some offers (trial, win-back) only exist locally. Rather than dead-end the
+    // buyer, fall back to the standard row for the same tier and interval.
+    let productId = String(payload.product_id ?? "").trim() || row.dodo_product_id || "";
+    if (!productId) {
+      const base = await catalogRow(tier, interval);
+      if (base?.dodo_product_id) {
+        row = base;
+        productId = base.dodo_product_id;
+      }
+    }
+    if (!productId) {
+      return json(
+        { error: "This option isn't available for card payment yet. Pick another plan." },
+        400,
+      );
+    }
+
+
+    const credits = Number(row.credits ?? 0);
+    const trialDays = Number(row.trial_days ?? 0);
     const orderId = `dodo_${crypto.randomUUID()}`;
     const site = (Deno.env.get("SITE_URL") || "https://megsyai.com").replace(/\/$/, "");
     const apiBase =
@@ -138,7 +155,7 @@ Deno.serve(async (request) => {
         plan: tier,
         credits: String(credits),
         interval,
-        slot,
+        slot: row.interval,
         trial_days: String(trialDays),
       },
     };
@@ -157,13 +174,12 @@ Deno.serve(async (request) => {
     const url = (dodoJson.payment_link || dodoJson.checkout_url) as string | undefined;
     if (!url) return json({ error: "Checkout failed" }, 502);
 
-    const pretax = Number(dodoJson.recurring_pre_tax_amount ?? 0);
     await admin.from("dodo_orders").insert({
       order_id: orderId,
       user_id: user.id,
       plan: tier,
       credits,
-      amount: Number.isFinite(pretax) ? pretax / 100 : 0,
+      amount: Number(row.usd_price ?? 0),
       currency: "USD",
       status: "pending",
       dodo_payment_id: (dodoJson.payment_id as string) ?? null,
@@ -171,17 +187,42 @@ Deno.serve(async (request) => {
       raw: dodoJson,
     });
 
-    return json({ ok: true, url, checkout_url: url, order_id: orderId, product_id: productId });
+    return json({
+      ok: true,
+      url,
+      checkout_url: url,
+      order_id: orderId,
+      product_id: productId,
+      slot: row.interval,
+      amount: Number(row.usd_price ?? 0),
+      currency: "USD",
+    });
   }
 
-  const sku = String(payload.sku ?? "");
+  // ---- Kashier (Egypt: local cards + mobile wallets) ------------------------
   const method = String(payload.method ?? "card").toLowerCase();
-  const offer = payload.offer ? String(payload.offer) : null;
   const display = payload.display === "ar" ? "ar" : "en";
-  const skuInfo = SKU_TABLE[sku];
-  if (!skuInfo) return json({ error: "unknown sku" }, 400);
   if (method !== "card" && method !== "wallet")
     return json({ error: "invalid payment method" }, 400);
+
+  // Legacy callers still send a raw sku; new callers send tier + interval.
+  const legacySku = String(payload.sku ?? "").trim();
+  let row: CatalogRow | null = null;
+  if (legacySku) {
+    const { data } = await admin
+      .from("billing_catalog")
+      .select("*")
+      .eq("kashier_sku", legacySku)
+      .eq("active", true)
+      .maybeSingle();
+    row = (data as CatalogRow | null) ?? null;
+  }
+  if (!row) row = await resolveRow(tier, interval, { trial, winback });
+  if (!row) return json({ error: "This plan isn't available for local payment yet." }, 400);
+
+  const amount = Number(row.egp_price ?? 0);
+  if (!amount || amount <= 0)
+    return json({ error: "This plan isn't available for local payment yet." }, 400);
 
   const merchantId = Deno.env.get("KASHIER_MERCHANT_ID")?.trim();
   const paymentKey = (
@@ -193,17 +234,22 @@ Deno.serve(async (request) => {
 
   const orderId = `ord_${crypto.randomUUID()}`;
   const currency = "EGP";
-  const amount = skuInfo.amount;
   const { error: insertError } = await admin.from("kashier_orders").insert({
     order_id: orderId,
     user_id: user.id,
     amount,
     currency,
-    credits: skuInfo.credits,
-    plan: skuInfo.plan,
+    credits: Number(row.credits ?? 0),
+    plan: row.tier,
     method,
     status: "pending",
-    raw: { sku, offer, display, trial_days: skuInfo.trialDays ?? 0 },
+    raw: {
+      sku: row.kashier_sku,
+      slot: row.interval,
+      interval: row.base_interval,
+      display,
+      trial_days: Number(row.trial_days ?? 0),
+    },
   });
   if (insertError) return json({ error: insertError.message }, 500);
 
@@ -228,9 +274,6 @@ Deno.serve(async (request) => {
     serverWebhook: webhookUrl,
     display,
     // Kashier's hosted page expects the official comma-separated method list.
-    // The selected method is carried as a UI preference; Kashier may still
-    // show the other enabled method, which avoids the phone-step 403 seen when
-    // a single unsupported method is forced into the legacy HPP URL.
     allowedMethods: "card,wallet",
   });
 
@@ -238,5 +281,8 @@ Deno.serve(async (request) => {
     ok: true,
     checkout_url: `https://checkout.kashier.io/?${params.toString()}`,
     order_id: orderId,
+    amount,
+    currency,
+    slot: row.interval,
   });
 });

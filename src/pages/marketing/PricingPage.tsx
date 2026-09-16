@@ -37,7 +37,7 @@ import {
   TRIAL_PRICE,
   TRIAL_DAYS,
 } from "@/lib/pricingOffers";
-import { dodoProductId } from "@/lib/dodoCatalog";
+import { useBillingCatalog, priceFor, trialAvailable } from "@/lib/billingCatalog";
 import { brandText, getZoneBrand } from "@/lib/zoneBrand";
 import { isEgMode } from "@/lib/egMode";
 import { isArabBilling } from "@/lib/payRegion";
@@ -84,10 +84,18 @@ const PricingPage = () => {
   const BRAND = getZoneBrand();
   const lang = useUserLang();
   const isAr = typeof lang === "string" && lang.toLowerCase().startsWith("ar");
-  const trialEligible = useIntroTrialEligible();
+  // Prices, credits and product ids all come from the billing catalog, so the
+  // number on screen is the number the payment page charges.
+  const { entries: catalog } = useBillingCatalog();
+  const [winbackOffer, setWinbackOffer] = useState(false);
+  useEffect(() => {
+    setWinbackOffer(hasAbandonedCheckout());
+  }, []);
+  const trialEligible = useIntroTrialEligible() && trialAvailable(catalog);
   const [sidebarCollapsed] = useSidebarCollapsed();
   const PLANS = brandText(RAW_PLANS);
   const FAQS = brandText(RAW_FAQS).slice(0, FAQ_LIMIT);
+
 
   const t = isAr
     ? {
@@ -208,43 +216,25 @@ const PricingPage = () => {
 
       const provider = gateway === "global" ? "dodo" : "kashier";
       const method = gateway === "wallets" ? "wallet" : "card";
-
-      if (provider === "kashier") {
-        const skuMap: Record<string, string> = {
-          "pro:monthly": "plan_pro_m_first",
-          "elite:monthly": "plan_elite_m",
-        };
-        const sku =
-          trial && tier === "pro" && interval === "monthly"
-            ? "plan_pro_m_trial"
-            : skuMap[`${tier}:${interval}`];
-        if (!sku) throw new Error("This plan isn't available for local payment yet.");
-
-        const { data: kData, error: kErr } = await supabase.functions.invoke("kashier-checkout", {
-          body: { sku, method, display: isEgMode() || isArabBilling() ? "ar" : "en" },
-        });
-        if (kErr || !kData?.checkout_url) {
-          throw new Error(kErr?.message || kData?.error || "Checkout failed");
-        }
-        markCheckoutOpened(interval);
-        window.location.href = kData.checkout_url;
-        return;
-      }
-
       const winback = hasAbandonedCheckout();
+
+      // One payload for both providers: the server picks the catalog row and
+      // therefore the price, credits and product id.
       const { data, error } = await invokeFunction("kashier-checkout", {
         body: {
           kind: "checkout",
+          provider,
           tier,
           interval,
           trial,
           free_trial: trial,
-          provider,
           winback,
-          ...(trial ? {} : { product_id: dodoProductId(interval, winback) }),
+          method,
+          display: isEgMode() || isArabBilling() ? "ar" : "en",
         },
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
+
 
       if (error) {
         const msg = (error as any)?.message?.toLowerCase?.() || "";
@@ -256,10 +246,12 @@ const PricingPage = () => {
         }
         throw error;
       }
-      if (data?.url) {
+      const checkoutUrl = data?.url || data?.checkout_url;
+      if (checkoutUrl) {
         markCheckoutOpened(interval);
-        window.location.href = data.url;
+        window.location.href = checkoutUrl;
       } else throw new Error(data?.error || "Checkout failed");
+
     } catch (e: any) {
       toast.error(e?.message || "Failed to open checkout. Please try again.");
     } finally {
@@ -406,7 +398,17 @@ const PricingPage = () => {
             {/* Plans */}
             <section id="plans-grid" className="mt-10 grid gap-5 sm:grid-cols-2">
               {PLANS.filter((p) => p.tier === "pro" || p.tier === "elite").map((plan) => {
-                const price = getDisplayPrice(plan, isYearly);
+                const fallbackPrice = getDisplayPrice(plan, isYearly);
+                const catalogEntry = priceFor(
+                  catalog,
+                  plan.tier === "elite" ? "elite" : "pro",
+                  isYearly ? "yearly" : "monthly",
+                  { winback: winbackOffer },
+                );
+                const price = catalogEntry
+                  ? { ...fallbackPrice, price: catalogEntry.usd }
+                  : fallbackPrice;
+
                 const highlights = PLAN_HIGHLIGHTS[plan.tier === "pro" ? "pro" : "max"];
                 const busy = loadingTier === plan.tier;
                 const featured = plan.tier === "pro";

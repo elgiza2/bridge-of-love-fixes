@@ -44,41 +44,32 @@ export default function SecondMonthOfferCard({ tier = "pro" }: Props) {
         return;
       }
 
-      // Local (Egypt / Arabic billing) uses the Kashier intro-price sku.
-      if (isEgMode() || isArabBilling()) {
-        const { data, error } = await supabase.functions.invoke("kashier-checkout", {
-          body: {
-            sku: tier === "pro" ? "plan_pro_m_first" : "plan_elite_m",
-            method: "card",
-            offer: "second_month",
-            display: "ar",
-          },
-        });
-        if (error || !data?.checkout_url) {
-          throw new Error(error?.message || data?.error || "Checkout failed");
-        }
-        window.location.href = data.checkout_url;
-        return;
-      }
-
+      // One payload for both gateways: the server resolves the catalog row and
+      // therefore the price, the credits and the product id.
+      const local = isEgMode() || isArabBilling();
       const { data, error } = await invokeFunction("kashier-checkout", {
         body: {
           kind: "checkout",
+          provider: local ? "kashier" : "dodo",
           tier,
           interval: "monthly",
+          trial: false,
           offer: "second_month",
           winback: true,
-          provider: "dodo",
+          method: "card",
+          display: local ? "ar" : "en",
         },
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (error) throw error;
-      if (data?.url) {
+      const checkoutUrl = data?.url || data?.checkout_url;
+      if (checkoutUrl) {
         setClaimed(true);
-        window.location.href = data.url;
+        window.location.href = checkoutUrl;
       } else {
         throw new Error(data?.error || "Checkout failed");
       }
+
     } catch (e: any) {
       toast.error(e?.message || "Couldn't open checkout. Please try again.");
     } finally {
