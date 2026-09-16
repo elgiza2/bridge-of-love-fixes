@@ -1,0 +1,27 @@
+/* Single render-critical CSS entry.
+ *
+ * These sheets used to be imported from `src/lib/spaBoot.ts`, which the "/$"
+ * route loads dynamically on the client. That meant the server-rendered HTML
+ * arrived with no stylesheet at all, so every page painted unstyled for a
+ * moment and looked broken while loading. Importing this file from
+ * `src/routes/__root.tsx` puts the whole bundle in the document's own graph, so
+ * the stylesheet ships as a <link> with the HTML.
+ *
+ * Order is load-bearing — keep it exactly as listed. */
+@import "../index.css";
+@import "./claude-chat.css";
+@import "./pwa-safe-area.css";
+@import "./pwa-responsive.css";
+@import "./font-fallback.css";
+@import "./view-transitions.css";
+@import "./megsy-tokens.css";
+@import "./deferred.css";
+@import "./chat-legibility.css";
+/* Must stay after the legacy sheets: keeps old mobile button colours from
+   coming back over the global sunset theme. */
+@import "./mobile-sunset-buttons.css";
+/* Light (white + pink) theme layer — after every legacy dark sheet. */
+@import "./light-theme.css";
+/* Device-tier layer last, so nothing re-adds the expensive decorative effects
+   it strips on weak devices. */
+@import "./perf-tier.css";
