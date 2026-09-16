@@ -84,10 +84,18 @@ const PricingPage = () => {
   const BRAND = getZoneBrand();
   const lang = useUserLang();
   const isAr = typeof lang === "string" && lang.toLowerCase().startsWith("ar");
-  const trialEligible = useIntroTrialEligible();
+  // Prices, credits and product ids all come from the billing catalog, so the
+  // number on screen is the number the payment page charges.
+  const { entries: catalog } = useBillingCatalog();
+  const [winbackOffer, setWinbackOffer] = useState(false);
+  useEffect(() => {
+    setWinbackOffer(hasAbandonedCheckout());
+  }, []);
+  const trialEligible = useIntroTrialEligible() && trialAvailable(catalog);
   const [sidebarCollapsed] = useSidebarCollapsed();
   const PLANS = brandText(RAW_PLANS);
   const FAQS = brandText(RAW_FAQS).slice(0, FAQ_LIMIT);
+
 
   const t = isAr
     ? {
