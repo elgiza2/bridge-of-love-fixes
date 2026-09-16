@@ -744,10 +744,10 @@ const AuthPage = () => {
         : "bg-transparent text-foreground border-foreground/30"
     }`;
 
-  // Secondary auth actions share one measured control style instead of
-  // looking like unrelated buttons with different visual weight.
+  // Secondary auth actions match the primary CTA exactly — same height, same
+  // pill radius, same type scale — so the stack reads as one set of controls.
   const socialCls =
-    "flex h-12 w-full items-center justify-center gap-3 rounded-2xl border border-foreground/15 bg-foreground/[0.025] px-4 text-[14px] font-medium text-foreground/90 shadow-sm transition-[transform,border-color,background-color,box-shadow] duration-200 hover:border-foreground/35 hover:bg-foreground/[0.06] hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30";
+    "flex h-12 w-full items-center justify-center gap-2.5 rounded-full border border-foreground/20 bg-foreground/[0.04] px-4 text-[14px] font-semibold text-foreground transition-[transform,border-color,background-color] duration-200 hover:border-foreground/35 hover:bg-foreground/[0.08] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30";
 
   // ─── Mobile intro — inline expandable email/password flow ──
   if (isMobile && (step === "intro1" || step === "email" || step === "password")) {
