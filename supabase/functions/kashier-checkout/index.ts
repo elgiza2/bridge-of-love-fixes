@@ -98,6 +98,9 @@ Deno.serve(async (request) => {
   const hash = await hmacHex(paymentKey, path);
   const siteUrl = (Deno.env.get("SITE_URL") || "https://megsyai.com").replace(/\/$/, "");
   const redirectUrl = `${siteUrl}/billing/success?provider=kashier&order=${encodeURIComponent(orderId)}`;
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")?.replace(/\/$/, "");
+  if (!supabaseUrl) return json({ error: "Payment callback is not configured" }, 503);
+  const webhookUrl = `${supabaseUrl}/functions/v1/kashier-webhook`;
   const mode =
     (Deno.env.get("KASHIER_MODE") || "live").trim().toLowerCase() === "test" ? "test" : "live";
 
@@ -109,6 +112,7 @@ Deno.serve(async (request) => {
     hash,
     mode,
     merchantRedirect: redirectUrl,
+    serverWebhook: webhookUrl,
     display,
     // Kashier's hosted page expects the official comma-separated method list.
     // The selected method is carried as a UI preference; Kashier may still
