@@ -19,6 +19,7 @@ type PurchasePayload = {
   ttp?: string;
   email?: string;
   externalId?: string;
+  testEventCode?: string;
 };
 
 async function sha256(value: string): Promise<string> {
