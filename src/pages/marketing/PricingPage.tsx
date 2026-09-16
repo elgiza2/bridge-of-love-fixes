@@ -95,8 +95,8 @@ const PricingPage = () => {
     setWinbackOffer(hasAbandonedCheckout());
     setArabRegion(isArabRegion());
   }, []);
-  const trialEligible =
-    arabRegion && useIntroTrialEligible() && trialAvailable(catalog);
+  const introTrialEligible = useIntroTrialEligible();
+  const trialEligible = arabRegion && introTrialEligible && trialAvailable(catalog);
   const [sidebarCollapsed] = useSidebarCollapsed();
   const PLANS = brandText(RAW_PLANS);
   const FAQS = brandText(RAW_FAQS).slice(0, FAQ_LIMIT);
