@@ -16,7 +16,7 @@ import { Link, useNavigate } from "react-router-dom";
 import MegsyStar from "@/components/branding/MegsyStar";
 import { MobileSidebarButton } from "@/components/shared/MobileSidebarButton";
 import { useUserLang } from "@/lib/authI18n";
-import { detectLocalMoney, formatLocalAmount } from "@/lib/localCurrency";
+import { detectLocalMoney, resolveLocalMoney, formatLocalAmount } from "@/lib/localCurrency";
 import { useIntroTrialEligible } from "@/lib/introTrial";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import { getDisplayPrice, getPlan, type PlanTier } from "@/data/pricingData";
@@ -38,7 +38,14 @@ function MegsyFeatureIcon({ className, style }: { className?: string; style?: Re
 function useLocalPrice() {
   const [money, setMoney] = useState<ReturnType<typeof detectLocalMoney>>(null);
   useEffect(() => {
+    let alive = true;
     setMoney(detectLocalMoney());
+    void resolveLocalMoney().then((m) => {
+      if (alive) setMoney(m);
+    });
+    return () => {
+      alive = false;
+    };
   }, []);
   return (usd: number) => formatLocalAmount(usd, money);
 }

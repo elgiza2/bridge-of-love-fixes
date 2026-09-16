@@ -65,8 +65,23 @@ const ZONE_TO_COUNTRY: Record<string, string> = {
   "Indian/Comoro": "KM",
 };
 
+const GEO_KEY = "megsy_geo_country";
+
+/** Country resolved from the network (IP), when we already know it. */
+function cachedGeoCountry(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const v = sessionStorage.getItem(GEO_KEY);
+    return v && /^[A-Z]{2}$/.test(v) ? v : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Best-effort country code for the current device, or null. */
 export function detectCountry(): string | null {
+  const geo = cachedGeoCountry();
+  if (geo) return geo;
   if (typeof Intl === "undefined") return null;
   try {
     const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -80,13 +95,48 @@ export function detectCountry(): string | null {
   return region ? region.toUpperCase() : null;
 }
 
+/**
+ * Country from the visitor's IP (edge headers), cached for the session. Falls
+ * back to the device guess when the edge does not expose a country.
+ */
+export async function resolveCountry(): Promise<string | null> {
+  const cached = cachedGeoCountry();
+  if (cached) return cached;
+  if (typeof fetch === "undefined") return detectCountry();
+  try {
+    const res = await fetch("/api/public/geo", { headers: { accept: "application/json" } });
+    if (res.ok) {
+      const body = (await res.json()) as { country?: string | null };
+      const country = body?.country?.toUpperCase() ?? null;
+      if (country && /^[A-Z]{2}$/.test(country)) {
+        try {
+          sessionStorage.setItem(GEO_KEY, country);
+        } catch {
+          // ignore
+        }
+        return country;
+      }
+    }
+  } catch {
+    // offline or blocked — device guess is good enough
+  }
+  return detectCountry();
+}
+
 /** Currency for the current device, when it is one we display. */
 export function detectLocalMoney(): Money | null {
   const country = detectCountry();
   return country ? (CURRENCY_BY_COUNTRY[country] ?? null) : null;
 }
 
+/** Currency for the visitor, using the IP country when available. */
+export async function resolveLocalMoney(): Promise<Money | null> {
+  const country = await resolveCountry();
+  return country ? (CURRENCY_BY_COUNTRY[country] ?? null) : null;
+}
+
 export type { Money };
+
 
 /**
  * "1,400 EGP" — the same converted amount without the "≈" prefix, for places
