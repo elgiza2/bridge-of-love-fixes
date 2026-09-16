@@ -177,8 +177,8 @@ export default function MobilePricingScreen({
   const monthly = getDisplayPrice(pro, false);
   const yearly = getDisplayPrice(pro, true);
 
-  // Catalog is the source of truth for every number shown here.
-  const { entries: catalog } = useBillingCatalog();
+  // Catalog rows for each billing option.
+
   const monthlyEntry = priceFor(catalog, "pro", "monthly", { winback });
   const yearlyEntry = priceFor(catalog, "pro", "yearly", { winback });
   const trialEntry = priceFor(catalog, "pro", "monthly", { trial: true });
