@@ -21,11 +21,16 @@ import { useIntroTrialEligible } from "@/lib/introTrial";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import { getDisplayPrice, getPlan, type PlanTier } from "@/data/pricingData";
 import {
+  useBillingCatalog,
+  priceFor,
+  trialAvailable,
+  type CatalogEntry,
+} from "@/lib/billingCatalog";
+import {
   INTRO_PRICE,
-  WINBACK_PRICE,
-  WINBACK_YEARLY_PRICE,
   hasAbandonedCheckout,
 } from "@/lib/pricingOffers";
+
 
 function MegsyFeatureIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return <MegsyStar className={className ?? "h-5 w-5"} />;
