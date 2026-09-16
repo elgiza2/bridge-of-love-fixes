@@ -231,7 +231,8 @@ const PricingPage = () => {
         return;
       }
 
-      const { data, error } = await invokeFunction("openrouter-media", {
+      const winback = hasAbandonedCheckout();
+      const { data, error } = await invokeFunction("kashier-checkout", {
         body: {
           kind: "checkout",
           tier,
@@ -239,7 +240,8 @@ const PricingPage = () => {
           trial,
           free_trial: trial,
           provider,
-          ...(trial ? {} : { product_id: dodoProductId(interval, hasAbandonedCheckout()) }),
+          winback,
+          ...(trial ? {} : { product_id: dodoProductId(interval, winback) }),
         },
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
