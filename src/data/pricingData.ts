@@ -267,7 +267,7 @@ export const SERVICES_GUIDE: { name: string; desc: string }[] = [
   },
   {
     name: "Video Generation",
-    desc: "Premium video models use MC from your monthly balance — about 40 videos on Pro and 120 on Max. DeAPI video models are always free and unlimited.",
+    desc: "Premium video models use MC from your monthly balance — about 40 videos a month. DeAPI video models are always free and unlimited.",
   },
   {
     name: "Megsy OS",
@@ -280,11 +280,7 @@ export const SERVICES_GUIDE: { name: string; desc: string }[] = [
   },
   {
     name: "Team Workspace",
-    desc: "Shared projects, files and chats for your team — included on Pro and Max.",
-  },
-  {
-    name: "Priority Queue",
-    desc: "Max gets a priority compute lane with up to 3× faster generations.",
+    desc: "Shared projects, files and chats for your team — included on Pro.",
   },
 ];
 
