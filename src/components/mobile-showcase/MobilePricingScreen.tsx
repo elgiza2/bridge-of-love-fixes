@@ -279,8 +279,9 @@ export default function MobilePricingScreen({
   useEffect(() => {
     setArabRegion(isArabRegion());
   }, []);
+  const introTrialEligible = useIntroTrialEligible();
   const trialEligible =
-    arabRegion && useIntroTrialEligible() && !alreadySubscribed && trialAvailable(catalog);
+    arabRegion && introTrialEligible && !alreadySubscribed && trialAvailable(catalog);
   const trialActive = trialEligible && !isYearly;
   const trialUsd = trialEntry?.usd ?? 1;
   const trialDays = trialEntry?.trialDays || 3;
