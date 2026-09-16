@@ -57,9 +57,9 @@ const VodafoneMark = ({ className }: { className?: string }) => (
 const RowIcon = ({ id }: { id: PayOption }) => {
   if (id === "local") {
     return (
-      <span className="flex h-9 w-12 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-black/5">
-        <VisaMark className="h-[9px] w-[21px]" />
-        <MastercardMark className="-ml-1 h-[10px] w-4" />
+      <span className="flex h-9 w-[54px] shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-black/5">
+        <VisaMark className="h-[10px] w-[24px]" />
+        <MastercardMark className="-ml-1 h-[11px] w-[18px]" />
       </span>
     );
   }
