@@ -172,9 +172,17 @@ export default function MobilePricingScreen({
   const monthly = getDisplayPrice(pro, false);
   const yearly = getDisplayPrice(pro, true);
 
-  const monthlyPrice = winback ? WINBACK_PRICE : monthly.price;
-  const yearlyPrice = winback ? WINBACK_YEARLY_PRICE : yearly.price;
+  // Catalog is the source of truth for every number shown here.
+  const { entries: catalog } = useBillingCatalog();
+  const monthlyEntry = priceFor(catalog, "pro", "monthly", { winback });
+  const yearlyEntry = priceFor(catalog, "pro", "yearly", { winback });
+  const trialEntry = priceFor(catalog, "pro", "monthly", { trial: true });
+  const monthlyBaseEntry = priceFor(catalog, "pro", "monthly", {});
+
+  const monthlyPrice = monthlyEntry?.usd ?? monthly.price;
+  const yearlyPrice = yearlyEntry?.usd ?? yearly.price;
   const monthlyOff = Math.round((1 - monthlyPrice / pro.monthlyPrice) * 100);
+
 
   const t = isAr
     ? {
