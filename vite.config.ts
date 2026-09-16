@@ -12,4 +12,9 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // On Vercel the server half of the app MUST be built with the vercel preset,
+  // otherwise the same-origin edge proxy under /api/public/edge/* is not
+  // deployed and every backend call fails with "Failed to fetch" in the
+  // browser. Inside Lovable builds this is ignored (the preset is pinned).
+  ...(process.env.VERCEL ? { nitro: { preset: "vercel" } as const } : {}),
 });

@@ -1,0 +1,1 @@
+ALTER TABLE public.abliteration_keys ADD COLUMN IF NOT EXISTS failure_count integer NOT NULL DEFAULT 0;
