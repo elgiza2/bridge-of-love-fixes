@@ -40,7 +40,7 @@ import {
 import { useBillingCatalog, priceFor, trialAvailable } from "@/lib/billingCatalog";
 import { brandText, getZoneBrand } from "@/lib/zoneBrand";
 import { isEgMode } from "@/lib/egMode";
-import { isArabBilling } from "@/lib/payRegion";
+import { isArabBilling, isArabRegion } from "@/lib/payRegion";
 import { useUserLang } from "@/lib/authI18n";
 import { useIntroTrialEligible } from "@/lib/introTrial";
 import { trackTikTokFunnelEvent } from "@/lib/analytics/tiktokPixel";
@@ -88,10 +88,15 @@ const PricingPage = () => {
   // number on screen is the number the payment page charges.
   const { entries: catalog } = useBillingCatalog();
   const [winbackOffer, setWinbackOffer] = useState(false);
+  // The $1 / 3-day trial runs through the local (Kashier) gateway, so it is
+  // only offered to Arab-region visitors.
+  const [arabRegion, setArabRegion] = useState(false);
   useEffect(() => {
     setWinbackOffer(hasAbandonedCheckout());
+    setArabRegion(isArabRegion());
   }, []);
-  const trialEligible = useIntroTrialEligible() && trialAvailable(catalog);
+  const introTrialEligible = useIntroTrialEligible();
+  const trialEligible = arabRegion && introTrialEligible && trialAvailable(catalog);
   const [sidebarCollapsed] = useSidebarCollapsed();
   const PLANS = brandText(RAW_PLANS);
   const FAQS = brandText(RAW_FAQS).slice(0, FAQ_LIMIT);

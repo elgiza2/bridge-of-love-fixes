@@ -67,3 +67,26 @@ export function guessPayRegion(): PayRegion {
 export function getPayRegionOrGuess(): PayRegion {
   return getPayRegion() ?? guessPayRegion();
 }
+
+const ARAB_COUNTRY_CODES = new Set([
+  "EG","SA","AE","KW","QA","BH","OM","JO","LB","SY","IQ","YE","PS","SD","LY","TN","DZ","MA","MR","SO","DJ","KM",
+]);
+
+/**
+ * True when the visitor should see the Arabic-region offers (the $1 / 3-day
+ * trial is sold through Kashier only). Uses the stored billing region first,
+ * then the country resolved from the connection, then the browser guess.
+ */
+export function isArabRegion(): boolean {
+  const stored = getPayRegion();
+  if (stored) return stored === "arab";
+  if (typeof window !== "undefined") {
+    try {
+      const geo = sessionStorage.getItem("megsy_geo_country");
+      if (geo) return ARAB_COUNTRY_CODES.has(geo.toUpperCase());
+    } catch {
+      // ignore
+    }
+  }
+  return guessPayRegion() === "arab";
+}
