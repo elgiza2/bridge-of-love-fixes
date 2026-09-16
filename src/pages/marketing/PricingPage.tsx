@@ -208,43 +208,25 @@ const PricingPage = () => {
 
       const provider = gateway === "global" ? "dodo" : "kashier";
       const method = gateway === "wallets" ? "wallet" : "card";
-
-      if (provider === "kashier") {
-        const skuMap: Record<string, string> = {
-          "pro:monthly": "plan_pro_m_first",
-          "elite:monthly": "plan_elite_m",
-        };
-        const sku =
-          trial && tier === "pro" && interval === "monthly"
-            ? "plan_pro_m_trial"
-            : skuMap[`${tier}:${interval}`];
-        if (!sku) throw new Error("This plan isn't available for local payment yet.");
-
-        const { data: kData, error: kErr } = await supabase.functions.invoke("kashier-checkout", {
-          body: { sku, method, display: isEgMode() || isArabBilling() ? "ar" : "en" },
-        });
-        if (kErr || !kData?.checkout_url) {
-          throw new Error(kErr?.message || kData?.error || "Checkout failed");
-        }
-        markCheckoutOpened(interval);
-        window.location.href = kData.checkout_url;
-        return;
-      }
-
       const winback = hasAbandonedCheckout();
+
+      // One payload for both providers: the server picks the catalog row and
+      // therefore the price, credits and product id.
       const { data, error } = await invokeFunction("kashier-checkout", {
         body: {
           kind: "checkout",
+          provider,
           tier,
           interval,
           trial,
           free_trial: trial,
-          provider,
           winback,
-          ...(trial ? {} : { product_id: dodoProductId(interval, winback) }),
+          method,
+          display: isEgMode() || isArabBilling() ? "ar" : "en",
         },
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
+
 
       if (error) {
         const msg = (error as any)?.message?.toLowerCase?.() || "";
