@@ -30,7 +30,7 @@ const BillingSuccessPage = () => {
   useEffect(() => {
     if (status === "success") {
       clearAbandonedCheckout();
-      if (details?.is_trial) markIntroTrialUsed();
+      if (details?.is_trial) void markIntroTrialUsed();
     }
   }, [details, status]);
 

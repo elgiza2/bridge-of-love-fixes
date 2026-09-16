@@ -182,7 +182,7 @@ export default function MobileAuthIntro({
                 type="button"
                 onClick={onGoogle}
                 initial={{ opacity: 0, height: 0, marginBottom: -10 }}
-                animate={{ opacity: 1, height: 52, marginBottom: 12 }}
+                animate={{ opacity: 1, height: 54, marginBottom: 10 }}
                 exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 className="theme-fixed w-full flex items-center justify-center gap-2.5 rounded-full bg-white text-background active:scale-[0.985] overflow-hidden"
@@ -220,7 +220,7 @@ export default function MobileAuthIntro({
           <motion.div
             layout
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="w-full h-[52px] rounded-full overflow-hidden"
+            className="w-full h-[54px] rounded-full overflow-hidden"
             style={{
               background: "var(--overlay-white-06)",
               border: "1px solid var(--overlay-white-14)",
@@ -238,17 +238,17 @@ export default function MobileAuthIntro({
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.18, ease: "easeOut" }}
-                  className="w-full h-full flex items-center justify-center gap-2 text-foreground active:scale-[0.985]"
+                  className="w-full h-full flex items-center justify-center gap-2.5 text-foreground active:scale-[0.985]"
                   style={{
                     fontSize: "15px",
-                    fontWeight: 500,
+                    fontWeight: 600,
                     letterSpacing: "0.1px",
                     touchAction: "manipulation",
                   }}
                 >
                   <svg
-                    width="17"
-                    height="17"
+                    width="18"
+                    height="18"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -299,7 +299,7 @@ export default function MobileAuthIntro({
                 style={{ overflow: "hidden" }}
               >
                 <div
-                  className="rounded-full px-5 h-[52px] flex items-center gap-2"
+                  className="rounded-full px-5 h-[54px] flex items-center gap-2"
                   style={{
                     background: "var(--overlay-white-06)",
                     border: "1px solid var(--overlay-white-14)",
@@ -347,7 +347,7 @@ export default function MobileAuthIntro({
                 type="submit"
                 disabled={isSubmitting || !primaryReady}
                 initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                animate={{ opacity: 1, height: 52, marginTop: 10 }}
+                animate={{ opacity: 1, height: 54, marginTop: 10 }}
                 exit={{ opacity: 0, height: 0, marginTop: 0 }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1], delay: 0.05 }}
                 data-sunset={primaryReady ? "true" : undefined}
