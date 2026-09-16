@@ -264,25 +264,29 @@ export default function MobilePricingScreen({
       };
 
   // The $1 / 3-day trial is not a box of its own: while the account has never
-  // used it, it *is* the monthly offer. After it is used the same box shows the
-  // $7 first month instead, and the trial never comes back.
-  const trialEligible = useIntroTrialEligible() && !alreadySubscribed;
+  // used it, it *is* the monthly offer. It only shows when the catalog actually
+  // has a sellable trial row, so the price on screen is always chargeable.
+  const trialEligible =
+    useIntroTrialEligible() && !alreadySubscribed && trialAvailable(catalog);
   const trialActive = trialEligible && !isYearly;
+  const trialUsd = trialEntry?.usd ?? 1;
+  const trialDays = trialEntry?.trialDays || 3;
+  const introUsd = monthlyBaseEntry?.usd ?? INTRO_PRICE;
 
   const trialCopy = isAr
     ? {
         label: "الشهر الأول",
-        badge: "3 أيام بـ 1$",
+        badge: `${trialDays} أيام بـ ${trialUsd}$`,
         unit: "",
-        fine: `3 أيام بـ 1$ فقط. بعدها ${INTRO_PRICE}$ للشهر الأول ثم ${pro.monthlyPrice}$ شهريًا. إلغاء في أي وقت.`,
-        cta: "ابدأ 3 أيام بـ 1$",
+        fine: `${trialDays} أيام بـ ${trialUsd}$ فقط. بعدها ${introUsd}$ للشهر الأول ثم ${pro.monthlyPrice}$ شهريًا. إلغاء في أي وقت.`,
+        cta: `ابدأ ${trialDays} أيام بـ ${trialUsd}$`,
       }
     : {
         label: "First month",
-        badge: "3 days for $1",
+        badge: `${trialDays} days for $${trialUsd}`,
         unit: "",
-        fine: `$1 for 3 days. Then $${INTRO_PRICE} first month, $${pro.monthlyPrice}/month after. Cancel anytime.`,
-        cta: "Start 3 days for $1",
+        fine: `$${trialUsd} for ${trialDays} days. Then $${introUsd} first month, $${pro.monthlyPrice}/month after. Cancel anytime.`,
+        cta: `Start ${trialDays} days for $${trialUsd}`,
       };
 
   const options = [
@@ -291,8 +295,10 @@ export default function MobilePricingScreen({
       yearly: false,
       label: trialEligible ? trialCopy.label : t.monthly,
       badge: trialEligible ? trialCopy.badge : t.introBadge,
-      price: trialEligible ? 1 : monthlyPrice,
-      strike: trialEligible ? INTRO_PRICE : monthly.strike,
+      price: trialEligible ? trialUsd : monthlyPrice,
+      entry: trialEligible ? trialEntry : monthlyEntry,
+      strike: trialEligible ? introUsd : monthly.strike,
+      strikeEntry: trialEligible ? monthlyBaseEntry : null,
       unit: trialEligible ? trialCopy.unit : t.perMonth,
     },
     {
@@ -301,9 +307,12 @@ export default function MobilePricingScreen({
       label: t.yearly,
       badge: t.yearlyBadge,
       price: yearlyPrice,
+      entry: yearlyEntry,
       strike: yearly.strike,
+      strikeEntry: null,
       unit: t.perYear,
     },
+
   ] as const;
 
   return (
