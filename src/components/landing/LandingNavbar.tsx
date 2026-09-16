@@ -32,138 +32,33 @@ interface NavLink {
 type NavItem = NavDropdown | NavLink;
 const isDropdown = (item: NavItem): item is NavDropdown => "columns" in item;
 
+// Only live destinations belong here — retired marketing routes silently
+// redirect to /chat, which reads as a broken menu entry.
 const navItems: NavItem[] = [
-  {
-    label: "Create",
-    columns: [
-      {
-        title: "AI Creation",
-        items: [
-          { label: "AI Chat", desc: "Chat with 80+ models including Megsy Pro", href: "/ai-chat" },
-          {
-            label: "AI Image Generator",
-            desc: "Create stunning visuals instantly",
-            href: "/l/ai-image-generator-unlimited",
-          },
-          {
-            label: "AI Video Generator",
-            desc: "Generate cinematic videos with AI",
-            href: "/l/ai-video-generator",
-          },
-        ],
-      },
-      {
-        title: "Studios",
-        items: [
-          { label: "Cinema Studio", desc: "Long-form cinematic video creation", href: "/l/ai-video-generator" },
-          { label: "Image Studio", desc: "Full AI image editing suite", href: "/l/ai-image-editor" },
-          { label: "Megsy Build", desc: "Ship full-stack apps with AI", href: "/l/build-ai-apps" },
-        ],
-      },
-    ],
-    featured: {
-      title: "Powered by\nMegsy Pro",
-      desc: "Experience our most advanced AI model — built in-house.",
-      cta: "Discover Megsy",
-      href: "/megsy-model",
-    },
-  },
-  {
-    label: "Products",
-    columns: [
-      {
-        title: "Image Tools",
-        items: [
-          { label: "Image Studio", desc: "Full image editing suite", href: "/l/ai-image-editor" },
-          {
-            label: "Background Remover",
-            desc: "Erase or replace backgrounds",
-            href: "/solutions/ai-background-remover",
-          },
-          { label: "Magic Erase", desc: "Remove unwanted objects", href: "/l/ai-image-editor" },
-          {
-            label: "Inpainting",
-            desc: "Fill missing areas with AI",
-            href: "/l/ai-image-editor",
-          },
-        ],
-      },
-      {
-        title: "Portrait & Style",
-        items: [
-          {
-            label: "Headshot Generator",
-            desc: "Studio-quality headshots",
-            href: "/l/ai-headshot-generator",
-          },
-          {
-            label: "Portrait Studio",
-            desc: "Face swap & portrait magic",
-            href: "/l/ai-headshot-generator",
-          },
-          {
-            label: "Retouching",
-            desc: "Pro-level photo retouching",
-            href: "/l/ai-image-editor",
-          },
-          {
-            label: "Logo Generator",
-            desc: "Brand-ready logos with AI",
-            href: "/l/ai-logo-generator",
-          },
-        ],
-      },
-      {
-        title: "Video Tools",
-        items: [
-          { label: "Video Studio", desc: "AI-powered video editing", href: "/l/ai-video-generator" },
-          { label: "Cinema Studio", desc: "Long-form cinematic video creation", href: "/l/ai-video-generator" },
-          {
-            label: "Thumbnail Generator",
-            desc: "Click-worthy thumbnails",
-            href: "/l/ai-thumbnail-generator",
-          },
-          {
-            label: "AI Video Generator",
-            desc: "Generate cinematic videos with AI",
-            href: "/l/ai-video-generator",
-          },
-        ],
-      },
-    ],
-    featured: {
-      title: "Reach out to our team",
-      desc: "Got a question about Megsy Pro? We're here to help.",
-      cta: "Submit Request",
-      href: "/contact",
-    },
-  },
+  { label: "Chat", href: "/chat" },
+  { label: "Pricing", href: "/pricing" },
   {
     label: "Company",
     columns: [
       {
-        title: "Resources",
+        title: "Company",
         items: [
-          { label: "Pricing", desc: "Plans, credits & savings", href: "/pricing" },
-          { label: "Enterprise", desc: "Megsy for large teams", href: "/enterprise" },
-          { label: "Solutions", desc: "Discover every Megsy service", href: "/solutions" },
-          { label: "Support", desc: "Get help from our AI assistant", href: "/support" },
+          { label: "About", desc: "What Megsy is and who builds it", href: "/about" },
+          { label: "Contact", desc: "Reach the Megsy team", href: "/contact" },
+          { label: "Security", desc: "How we protect your data", href: "/security" },
         ],
       },
       {
-        title: "Trust & Legal",
+        title: "Legal",
         items: [
-          { label: "Trust Center", desc: "Security & compliance", href: "/trust" },
-          { label: "Content Policy", desc: "What you can create", href: "/policies/content" },
           { label: "Privacy", desc: "How we handle your data", href: "/privacy" },
           { label: "Terms", desc: "Terms of service", href: "/terms" },
+          { label: "Refunds", desc: "Refund policy", href: "/refund" },
         ],
       },
     ],
   },
-  { label: "Pricing", href: "/pricing" },
   { label: "Earn", href: "/settings/referrals" },
-  { label: "Contact", href: "/contact" },
 ];
 
 const LandingNavbar = () => {
