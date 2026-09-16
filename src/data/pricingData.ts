@@ -235,19 +235,19 @@ export const ENTERPRISE_FEATURES: string[] = [
 export const SERVICES_GUIDE: { name: string; desc: string }[] = [
   {
     name: "Cloud Computer",
-    desc: "Megsy drives a real cloud browser and desktop — it clicks, types, fills forms, downloads files and finishes the job while you watch. Included on Pro; Max gets longer sessions and parallel machines.",
+    desc: "Megsy drives a real cloud browser and desktop — it clicks, types, fills forms, downloads files and finishes the job while you watch. Included on Pro.",
   },
   {
     name: "Long-Running Tasks",
-    desc: "Hand over work that takes hours. Tasks keep running after you close the app and pick up where they stopped — up to 4 hours on Pro and 12 hours on Max, with automatic recovery.",
+    desc: "Hand over work that takes hours. Tasks keep running after you close the app and pick up where they stopped — up to 4 hours, with automatic recovery.",
   },
   {
     name: "Background Agents",
-    desc: "Agents work in parallel on separate jobs and report back when done. 3 in parallel on Pro, unlimited on Max.",
+    desc: "Agents work in parallel on separate jobs and report back when done. Up to 3 in parallel on Pro.",
   },
   {
     name: "Unlimited Chat",
-    desc: "Talk to Megsy AI with every flagship model and no daily caps on Pro and Max. The free plan uses Megsy Lite.",
+    desc: "Talk to Megsy AI with every flagship model and no daily caps on Pro. The free plan uses Megsy Lite.",
   },
   {
     name: "Image Generation",
@@ -267,7 +267,7 @@ export const SERVICES_GUIDE: { name: string; desc: string }[] = [
   },
   {
     name: "Video Generation",
-    desc: "Premium video models use MC from your monthly balance — about 40 videos on Pro and 120 on Max. DeAPI video models are always free and unlimited.",
+    desc: "Premium video models use MC from your monthly balance — about 40 videos a month. DeAPI video models are always free and unlimited.",
   },
   {
     name: "Megsy OS",
@@ -280,18 +280,14 @@ export const SERVICES_GUIDE: { name: string; desc: string }[] = [
   },
   {
     name: "Team Workspace",
-    desc: "Shared projects, files and chats for your team — included on Pro and Max.",
-  },
-  {
-    name: "Priority Queue",
-    desc: "Max gets a priority compute lane with up to 3× faster generations.",
+    desc: "Shared projects, files and chats for your team — included on Pro.",
   },
 ];
 
 export const FAQS: { q: string; a: string }[] = [
   {
     q: "How does the $7 first month work?",
-    a: "Your first month of Pro is $7 instead of $20 (Max is $17 instead of $40). Right after your payment clears we offer you a second month at the same intro price — one tap on Pay now and you are covered for two full months. After that, the plan renews at its standard monthly price and you can cancel anytime.",
+    a: "Your first month of Pro is $7 instead of $20. Right after your payment clears we offer you a second month at the same intro price — one tap on Pay now and you are covered for two full months. After that, the plan renews at its standard monthly price and you can cancel anytime.",
   },
   {
     q: "Can I change or cancel my plan anytime?",
@@ -299,7 +295,7 @@ export const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What are Megsy Credits (MC)?",
-    a: "Chat and image generation are unlimited on every paid plan. MC is a separate monthly balance used for premium video generation and premium model runs — 240 MC on Pro (about 40 videos) and 600 MC on Max (about 120 videos). DeAPI video models never cost MC.",
+    a: "Chat and image generation are unlimited on every paid plan. MC is a separate monthly balance used for premium video generation and premium model runs — 240 MC on Pro (about 40 videos). DeAPI video models never cost MC.",
   },
   {
     q: "What happens when I run out of MC?",
@@ -307,7 +303,7 @@ export const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Do unused credits roll over?",
-    a: "No. Monthly MC reset at the start of each cycle. Yearly plans get bonus MC delivered upfront (Pro +720, Max +1,800) on top of four months free.",
+    a: "No. Monthly MC reset at the start of each cycle. Yearly plans get bonus MC delivered upfront (+720) on top of four months free.",
   },
   {
     q: "Do prices include tax?",
@@ -323,6 +319,6 @@ export const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Do you offer team or enterprise plans?",
-    a: "Yes. Max includes team workspaces, and for custom MC allocation, SSO, dedicated infrastructure, custom contracts or volume discounts contact our enterprise team via the Enterprise page or support@megsyai.com.",
+    a: "Yes. Pro includes team workspaces, and for custom MC allocation, SSO, dedicated infrastructure, custom contracts or volume discounts contact our enterprise team via the Enterprise page or support@megsyai.com.",
   },
 ];
