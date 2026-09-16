@@ -164,8 +164,8 @@ export default function MobilePricingScreen({
         perMonth: "/ الشهر الأول",
         perYear: "/ سنة",
         fine: winback
-          ? `عرض العودة: $${monthlyPrice}.00 للشهر الأول بدلاً من $${INTRO_PRICE}.00، ثم $${pro.monthlyPrice}.00/شهر. يمكنك الإلغاء في أي وقت.`
-          : `$${monthlyPrice}.00 للشهر الأول، ثم $${pro.monthlyPrice}.00/شهر. يمكنك الإلغاء في أي وقت.`,
+          ? `عرض العودة: ${monthlyPrice}$ للشهر الأول بدل ${INTRO_PRICE}$، ثم ${pro.monthlyPrice}$ شهريًا. إلغاء في أي وقت.`
+          : `${monthlyPrice}$ للشهر الأول، ثم ${pro.monthlyPrice}$ شهريًا. إلغاء في أي وقت.`,
         cta: "قم بالترقية الآن",
         terms: "الشروط",
         privacy: "الخصوصية",
@@ -180,8 +180,8 @@ export default function MobilePricingScreen({
         perMonth: "/first mo",
         perYear: "/year",
         fine: winback
-          ? `Come-back offer: $${monthlyPrice}.00 for your first month instead of $${INTRO_PRICE}.00, then $${pro.monthlyPrice}.00/month. Cancel anytime.`
-          : `$${monthlyPrice}.00 for the first month, then $${pro.monthlyPrice}.00/month. Cancel anytime.`,
+          ? `Come-back offer: $${monthlyPrice} first month instead of $${INTRO_PRICE}, then $${pro.monthlyPrice}/month. Cancel anytime.`
+          : `$${monthlyPrice} first month, then $${pro.monthlyPrice}/month. Cancel anytime.`,
         cta: "Upgrade now",
         terms: "Terms",
         privacy: "Privacy",
@@ -244,14 +244,14 @@ export default function MobilePricingScreen({
         label: "الشهر الأول — 3 أيام بـ 1$",
         badge: "عرض البداية",
         unit: "/ 3 أيام",
-        fine: `1$ لمدة 3 أيام، وخلال التجربة 3 صور متقدمة يوميًا. بعدها ${`$${INTRO_PRICE}`} للشهر الأول ثم $${pro.monthlyPrice}/شهر مع صور بلا حدود. يمكنك الإلغاء في أي وقت.`,
+        fine: `3 أيام بـ 1$ فقط — 3 صور متقدمة يوميًا. بعدها ${INTRO_PRICE}$ للشهر الأول ثم ${pro.monthlyPrice}$ شهريًا. إلغاء في أي وقت.`,
         cta: "ابدأ 3 أيام بـ 1$",
       }
     : {
         label: "Monthly — 3 days for $1",
         badge: "INTRO OFFER",
         unit: "/ 3 days",
-        fine: `$1 for 3 days, with 3 premium images per day during the trial. Then $${INTRO_PRICE}.00 for your first month and $${pro.monthlyPrice}.00/month after, with unlimited images. Cancel anytime.`,
+        fine: `$1 for 3 days — 3 premium images daily. Then $${INTRO_PRICE} first month, $${pro.monthlyPrice}/month after. Cancel anytime.`,
         cta: "Start 3 days for $1",
       };
 
