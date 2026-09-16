@@ -25,6 +25,7 @@ import { Route as ApiReadUrlRouteImport } from './routes/api/read-url'
 import { Route as ApiRenderPdfRouteImport } from './routes/api/render-pdf'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiWebSearchRouteImport } from './routes/api/web-search'
+import { Route as ApiPublicGeoRouteImport } from './routes/api/public/geo'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -106,6 +107,11 @@ const ApiWebSearchRoute = ApiWebSearchRouteImport.update({
   path: '/api/web-search',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicGeoRoute = ApiPublicGeoRouteImport.update({
+  id: '/api/public/geo',
+  path: '/api/public/geo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/api/render-pdf': typeof ApiRenderPdfRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/api/web-search': typeof ApiWebSearchRoute
+  '/api/public/geo': typeof ApiPublicGeoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByTo {
   '/api/render-pdf': typeof ApiRenderPdfRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/api/web-search': typeof ApiWebSearchRoute
+  '/api/public/geo': typeof ApiPublicGeoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -161,6 +169,7 @@ export interface FileRoutesById {
   '/api/render-pdf': typeof ApiRenderPdfRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/api/web-search': typeof ApiWebSearchRoute
+  '/api/public/geo': typeof ApiPublicGeoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -181,6 +190,7 @@ export interface FileRouteTypes {
     | '/api/render-pdf'
     | '/api/transcribe'
     | '/api/web-search'
+    | '/api/public/geo'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -199,6 +209,7 @@ export interface FileRouteTypes {
     | '/api/render-pdf'
     | '/api/transcribe'
     | '/api/web-search'
+    | '/api/public/geo'
   id:
     | '__root__'
     | '/'
@@ -217,6 +228,7 @@ export interface FileRouteTypes {
     | '/api/render-pdf'
     | '/api/transcribe'
     | '/api/web-search'
+    | '/api/public/geo'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -236,6 +248,7 @@ export interface RootRouteChildren {
   ApiRenderPdfRoute: typeof ApiRenderPdfRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
   ApiWebSearchRoute: typeof ApiWebSearchRoute
+  ApiPublicGeoRoute: typeof ApiPublicGeoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -352,6 +365,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWebSearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/geo': {
+      id: '/api/public/geo'
+      path: '/api/public/geo'
+      fullPath: '/api/public/geo'
+      preLoaderRoute: typeof ApiPublicGeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -372,6 +392,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiRenderPdfRoute: ApiRenderPdfRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
   ApiWebSearchRoute: ApiWebSearchRoute,
+  ApiPublicGeoRoute: ApiPublicGeoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
