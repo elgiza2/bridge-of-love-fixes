@@ -37,7 +37,7 @@ import {
   TRIAL_PRICE,
   TRIAL_DAYS,
 } from "@/lib/pricingOffers";
-import { dodoProductId } from "@/lib/dodoCatalog";
+import { useBillingCatalog, priceFor, trialAvailable } from "@/lib/billingCatalog";
 import { brandText, getZoneBrand } from "@/lib/zoneBrand";
 import { isEgMode } from "@/lib/egMode";
 import { isArabBilling } from "@/lib/payRegion";
@@ -238,10 +238,12 @@ const PricingPage = () => {
         }
         throw error;
       }
-      if (data?.url) {
+      const checkoutUrl = data?.url || data?.checkout_url;
+      if (checkoutUrl) {
         markCheckoutOpened(interval);
-        window.location.href = data.url;
+        window.location.href = checkoutUrl;
       } else throw new Error(data?.error || "Checkout failed");
+
     } catch (e: any) {
       toast.error(e?.message || "Failed to open checkout. Please try again.");
     } finally {
