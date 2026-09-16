@@ -287,7 +287,7 @@ export const SERVICES_GUIDE: { name: string; desc: string }[] = [
 export const FAQS: { q: string; a: string }[] = [
   {
     q: "How does the $7 first month work?",
-    a: "Your first month of Pro is $7 instead of $20 (Max is $17 instead of $40). Right after your payment clears we offer you a second month at the same intro price — one tap on Pay now and you are covered for two full months. After that, the plan renews at its standard monthly price and you can cancel anytime.",
+    a: "Your first month of Pro is $7 instead of $20. Right after your payment clears we offer you a second month at the same intro price — one tap on Pay now and you are covered for two full months. After that, the plan renews at its standard monthly price and you can cancel anytime.",
   },
   {
     q: "Can I change or cancel my plan anytime?",
@@ -295,7 +295,7 @@ export const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What are Megsy Credits (MC)?",
-    a: "Chat and image generation are unlimited on every paid plan. MC is a separate monthly balance used for premium video generation and premium model runs — 240 MC on Pro (about 40 videos) and 600 MC on Max (about 120 videos). DeAPI video models never cost MC.",
+    a: "Chat and image generation are unlimited on every paid plan. MC is a separate monthly balance used for premium video generation and premium model runs — 240 MC on Pro (about 40 videos). DeAPI video models never cost MC.",
   },
   {
     q: "What happens when I run out of MC?",
@@ -303,7 +303,7 @@ export const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Do unused credits roll over?",
-    a: "No. Monthly MC reset at the start of each cycle. Yearly plans get bonus MC delivered upfront (Pro +720, Max +1,800) on top of four months free.",
+    a: "No. Monthly MC reset at the start of each cycle. Yearly plans get bonus MC delivered upfront (+720) on top of four months free.",
   },
   {
     q: "Do prices include tax?",
@@ -319,6 +319,6 @@ export const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Do you offer team or enterprise plans?",
-    a: "Yes. Max includes team workspaces, and for custom MC allocation, SSO, dedicated infrastructure, custom contracts or volume discounts contact our enterprise team via the Enterprise page or support@megsyai.com.",
+    a: "Yes. Pro includes team workspaces, and for custom MC allocation, SSO, dedicated infrastructure, custom contracts or volume discounts contact our enterprise team via the Enterprise page or support@megsyai.com.",
   },
 ];
