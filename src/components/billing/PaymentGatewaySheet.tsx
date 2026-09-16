@@ -87,7 +87,7 @@ function PaymentGatewaySheetImpl({
   const isArabic = lang.startsWith("ar");
   const resolvedTitle = title === "Choose payment method" && isArabic ? "طريقة الدفع" : title;
   const resolvedSubtitle =
-    subtitle === "Pick an option." && isArabic ? "اختر الطريقة اللي تناسبك." : subtitle;
+    subtitle === "Pick an option." && isArabic ? "اختار طريقة الدفع اللي تناسبك." : subtitle;
 
   useEffect(() => {
     if (!open) return;
@@ -180,7 +180,7 @@ function PaymentGatewaySheetImpl({
         <button
           type="button"
           onClick={onClose}
-          className="mt-4 h-11 w-full rounded-full text-[14px] font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+          className="mt-4 h-12 w-full rounded-full text-[15px] font-semibold text-foreground/70 transition-colors hover:bg-muted/50 hover:text-foreground"
         >
           {isArabic ? "إلغاء" : "Cancel"}
         </button>
