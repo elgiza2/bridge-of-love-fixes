@@ -1,1 +1,9 @@
 project_id = "qdnqxjzjecaieuavagvq"
+
+# Purchases must be reported even when the buyer is not signed in on this
+# device, so the endpoint cannot require a Supabase session.
+[functions.tiktok-purchase]
+verify_jwt = false
+
+[functions.kashier-webhook]
+verify_jwt = false
