@@ -238,7 +238,7 @@ const PricingPage = () => {
           free_trial: trial,
           winback,
           method,
-          display: isEgMode() || isArabBilling() ? "ar" : "en",
+          display: isEgMode() || isArabBilling() || arabRegion ? "ar" : "en",
         },
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
