@@ -7,8 +7,19 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+const ALLOWED_EVENTS = new Set([
+  "CompletePayment",
+  "ViewContent",
+  "InitiateCheckout",
+  "AddToCart",
+  "CompleteRegistration",
+]);
+
 type PurchasePayload = {
+  /** Defaults to CompletePayment so existing callers keep working. */
+  event?: string;
   eventId: string;
+  contentId?: string;
   value?: number;
   currency?: string;
   productName?: string;
