@@ -30,6 +30,8 @@ import {
   INTRO_PRICE,
   hasAbandonedCheckout,
 } from "@/lib/pricingOffers";
+import { isArabRegion } from "@/lib/payRegion";
+
 
 
 function MegsyFeatureIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
