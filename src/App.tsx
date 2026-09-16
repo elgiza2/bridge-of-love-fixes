@@ -160,6 +160,21 @@ const useAuthSession = () => {
         void claimPendingReferral();
       }
 
+      // TikTok funnel: CompleteRegistration, once per account, only for an
+      // account created in the last 10 minutes (a real sign-up, not a login).
+      if (userId && event === "SIGNED_IN") {
+        const createdAt = session?.user?.created_at ? Date.parse(session.user.created_at) : NaN;
+        if (Number.isFinite(createdAt) && Date.now() - createdAt < 10 * 60 * 1000) {
+          trackTikTokFunnelEvent("CompleteRegistration", {
+            eventId: `signup-${userId}`,
+            contentId: "account",
+            contentName: "Account created",
+            once: true,
+          });
+        }
+      }
+
+
       setCurrentUserId(userId);
     });
 
