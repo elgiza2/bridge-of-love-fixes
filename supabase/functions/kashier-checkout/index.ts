@@ -109,16 +109,26 @@ Deno.serve(async (request) => {
     ).trim();
     if (!apiKey) return json({ error: "Dodo is not configured" }, 503);
 
-    const row = await resolveRow(tier, interval, { trial, winback });
+    let row = await resolveRow(tier, interval, { trial, winback });
     if (!row) return json({ error: "This plan isn't available yet." }, 400);
 
-    const productId = String(payload.product_id ?? "").trim() || row.dodo_product_id || "";
+    // Some offers (trial, win-back) only exist locally. Rather than dead-end the
+    // buyer, fall back to the standard row for the same tier and interval.
+    let productId = String(payload.product_id ?? "").trim() || row.dodo_product_id || "";
+    if (!productId) {
+      const base = await catalogRow(tier, interval);
+      if (base?.dodo_product_id) {
+        row = base;
+        productId = base.dodo_product_id;
+      }
+    }
     if (!productId) {
       return json(
         { error: "This option isn't available for card payment yet. Pick another plan." },
         400,
       );
     }
+
 
     const credits = Number(row.credits ?? 0);
     const trialDays = Number(row.trial_days ?? 0);
