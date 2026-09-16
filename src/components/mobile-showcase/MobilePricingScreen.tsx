@@ -37,8 +37,10 @@ function MegsyFeatureIcon({ className, style }: { className?: string; style?: Re
 }
 
 /**
- * "50 EGP" for a dollar amount, from the device's own country. Resolved after
- * mount so the first paint matches the server markup.
+ * "50 EGP" for a dollar amount, from the visitor's own country and the live
+ * exchange rate. Resolved after mount so the first paint matches the server
+ * markup. Egyptian visitors see the exact EGP amount from the catalog — the
+ * same number Kashier charges — instead of a converted estimate.
  */
 function useLocalPrice() {
   const [money, setMoney] = useState<ReturnType<typeof detectLocalMoney>>(null);
@@ -52,8 +54,14 @@ function useLocalPrice() {
       alive = false;
     };
   }, []);
-  return (usd: number) => formatLocalAmount(usd, money);
+  return (usd: number, entry?: CatalogEntry | null) => {
+    if (money?.code === "EGP" && entry?.egp) {
+      return formatLocalAmount(entry.egp / (money.rate || 1), money) ?? `${entry.egp} EGP`;
+    }
+    return formatLocalAmount(usd, money);
+  };
 }
+
 
 
 function useCompactHeight() {
