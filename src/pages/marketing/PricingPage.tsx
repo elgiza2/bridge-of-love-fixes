@@ -280,6 +280,13 @@ const PricingPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // TEMP(paytest): open the gateway sheet via ?__paytest=1 for visual QA — remove.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("__paytest") === "1") {
+      setGatewaySheet({ tier: "pro", interval: "monthly", trial: false });
+    }
+  }, []);
+
   const isMobile = useIsMobile();
   const proPlan = PLANS.find((p) => p.tier === "pro");
 
