@@ -125,10 +125,10 @@ function PaymentGatewaySheetImpl({
         </div>
 
         <div className="pt-5 pb-5 text-center sm:pt-6">
-          <p className="text-[19px] font-semibold tracking-[-0.01em] leading-tight">
+          <p className="text-[20px] font-bold tracking-[-0.01em] leading-tight text-foreground">
             {resolvedTitle}
           </p>
-          <p className="mt-2 text-[13.5px] leading-relaxed text-muted-foreground">
+          <p className="mt-2 text-[14px] leading-relaxed text-foreground/65">
             {resolvedSubtitle}
           </p>
         </div>
@@ -156,11 +156,11 @@ function PaymentGatewaySheetImpl({
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted/70">
                   <Icon className="h-[17px] w-[17px] text-foreground/70" strokeWidth={1.6} />
                 </span>
-                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="truncate text-[15px] font-medium leading-tight text-foreground">
+                <span className="flex min-w-0 flex-1 flex-col gap-1">
+                  <span className="truncate text-[16px] font-semibold leading-tight text-foreground">
                     {label}
                   </span>
-                  <span className="truncate text-[12.5px] font-normal leading-tight text-muted-foreground">
+                  <span className="truncate text-[13.5px] font-normal leading-tight text-foreground/60">
                     {caption}
                   </span>
                 </span>
