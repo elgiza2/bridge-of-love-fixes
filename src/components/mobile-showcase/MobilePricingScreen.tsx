@@ -56,10 +56,19 @@ function useLocalPrice() {
   }, []);
   return (usd: number, entry?: CatalogEntry | null) => {
     if (money?.code === "EGP" && entry?.egp) {
-      return formatLocalAmount(entry.egp / (money.rate || 1), money) ?? `${entry.egp} EGP`;
+      try {
+        return new Intl.NumberFormat(undefined, {
+          style: "currency",
+          currency: "EGP",
+          maximumFractionDigits: 0,
+        }).format(entry.egp);
+      } catch {
+        return `${entry.egp} EGP`;
+      }
     }
     return formatLocalAmount(usd, money);
   };
+
 }
 
 
