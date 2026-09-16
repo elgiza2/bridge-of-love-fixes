@@ -61,12 +61,13 @@ export default function SecondMonthOfferCard({ tier = "pro" }: Props) {
         return;
       }
 
-      const { data, error } = await invokeFunction("openrouter-media", {
+      const { data, error } = await invokeFunction("kashier-checkout", {
         body: {
           kind: "checkout",
           tier,
           interval: "monthly",
           offer: "second_month",
+          winback: true,
           provider: "dodo",
         },
         headers: { Authorization: `Bearer ${session.access_token}` },
