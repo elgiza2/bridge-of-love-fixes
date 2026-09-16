@@ -291,7 +291,7 @@ const PricingPage = () => {
           onClose={() => setGatewaySheet(null)}
           onSelect={runCheckout}
           loading={gatewayLoading}
-          options={["local", "wallets"]}
+          options={["local", "wallets", "global"]}
 
         />
       )}
