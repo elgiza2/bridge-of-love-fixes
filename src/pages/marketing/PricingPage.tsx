@@ -292,10 +292,7 @@ const PricingPage = () => {
           onSelect={runCheckout}
           loading={gatewayLoading}
           options={["local", "wallets"]}
-          labels={{
-            local: "Visa / Mastercard",
-            wallets: "Mobile wallets (Vodafone Cash and others)",
-          }}
+
         />
       )}
     </Suspense>
