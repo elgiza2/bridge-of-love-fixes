@@ -45,6 +45,27 @@ function sessionId(): string {
 let currentRowId: string | null = null;
 let startedAt = 0;
 
+async function visitorCountry(): Promise<string | null> {
+  const storageKey = "megsy_geo_country";
+  try {
+    const cached = sessionStorage.getItem(storageKey)?.toUpperCase();
+    if (cached && /^[A-Z]{2}$/.test(cached)) return cached;
+
+    const response = await fetch("/api/public/geo", {
+      headers: { accept: "application/json" },
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    const payload = (await response.json()) as { country?: unknown };
+    const country = typeof payload.country === "string" ? payload.country.toUpperCase() : null;
+    if (!country || !/^[A-Z]{2}$/.test(country)) return null;
+    sessionStorage.setItem(storageKey, country);
+    return country;
+  } catch {
+    return null;
+  }
+}
+
 /** Closes the open view with its duration. Safe to call repeatedly. */
 export async function closePageView(): Promise<void> {
   const id = currentRowId;
@@ -71,12 +92,16 @@ export async function trackPageView(path: string): Promise<void> {
   startedAt = Date.now();
   const id = newId();
   try {
-    const { data: auth } = await supabase.auth.getUser();
+    const [{ data: auth }, country] = await Promise.all([
+      supabase.auth.getUser(),
+      visitorCountry(),
+    ]);
     const { error } = await supabase.from("page_views").insert({
       id,
       visitor_id: visitorId(),
       session_id: sessionId(),
       path,
+      country,
       referrer: document.referrer ? document.referrer.slice(0, 500) : null,
       user_agent: navigator.userAgent.slice(0, 300),
       user_id: auth?.user?.id ?? null,
