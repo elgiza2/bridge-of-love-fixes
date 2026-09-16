@@ -109,14 +109,32 @@ Deno.serve(async (request) => {
   }
 
   try {
-    const result = JSON.parse(text) as { code?: number; message?: string };
+    const result = JSON.parse(text) as {
+      code?: number;
+      message?: string;
+      request_id?: string;
+      data?: { request_id?: string };
+    };
     if (result.code && result.code !== 0) {
       console.error(`TikTok Events API rejected event: ${text}`);
-      return json({ ok: false, reason: "tiktok_rejected" }, 502);
+      return json({
+        ok: false,
+        reason: "tiktok_rejected",
+        code: result.code,
+        message: result.message,
+        requestId: result.request_id ?? result.data?.request_id,
+      }, 502);
     }
+
+    const requestId = result.request_id ?? result.data?.request_id;
+    console.log(`TikTok accepted ${data.eventId}; request_id=${requestId ?? "not_returned"}`);
+    return json({
+      ok: true,
+      eventId: data.eventId,
+      requestId,
+      message: result.message ?? "OK",
+    });
   } catch {
     return json({ ok: false, reason: "invalid_tiktok_response" }, 502);
   }
-
-  return json({ ok: true });
 });
