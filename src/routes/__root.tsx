@@ -328,9 +328,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 // AdRoll retargeting pixel. Loaded lazily after the app is interactive so the
 // third-party request never competes with the first paint, and re-fired on SPA
 // navigation because the loader only counts one pageView per document.
+// IMPORTANT: the tag only starts after the visitor accepted cookies through
+// Megsy's own banner (megsy_cookies_accepted === "true"). Loading it earlier
+// makes AdRoll/NextRoll show its full-screen Didomi consent dialog, which
+// covers the pricing/checkout UI.
 const ADROLL_SCRIPT = `
 (function(){
   var start = function(){
+    try {
+      if (localStorage.getItem("megsy_cookies_accepted") !== "true") return;
+    } catch (e) { return; }
+    if (window.__adroll_loaded) return;
     var w = window, d = document;
     w.adroll_adv_id = "U7L76NUFIBDU5JJZWFGSPY";
     w.adroll_pix_id = "YH6HQKQYMVBAFP6KK4M5WU";
@@ -358,6 +366,9 @@ const ADROLL_SCRIPT = `
     };
     w.addEventListener("megsy:navigation", onNav);
     w.addEventListener("popstate", onNav);
+    // If consent arrives after boot (user clicks Accept in the Megsy banner),
+    // start the pixel then.
+    w.addEventListener("megsy:cookies-accepted", start);
   };
   if (window.requestIdleCallback) requestIdleCallback(start, { timeout: 4000 });
   else setTimeout(start, 2500);
