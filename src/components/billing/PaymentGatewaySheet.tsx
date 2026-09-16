@@ -153,7 +153,13 @@ function PaymentGatewaySheetImpl({
 
   if (!open) return null;
 
-  const visible = ROWS.filter((row) => !options || options.includes(row.id));
+  // Respect the caller's order so the most relevant method comes first
+  // (local card before the international card on the Arabic site).
+  const visible = options
+    ? options
+        .map((id) => ROWS.find((row) => row.id === id))
+        .filter((row): row is (typeof ROWS)[number] => !!row)
+    : ROWS;
 
   return (
     <div
