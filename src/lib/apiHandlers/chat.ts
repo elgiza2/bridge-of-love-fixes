@@ -29,6 +29,11 @@ export default async function handler(req: Request): Promise<Response> {
     return streamDeepResearch(payload ?? {}, req);
   }
 
+  // Without this guard the proxy is an open relay: anyone could burn provider
+  // credit by POSTing here with no session.
+  const guard = await guardApiRequest(req, "chat");
+  if (!guard.ok) return guardResponse(guard, headers);
+
   const payload = (await req.json().catch(() => null)) as ChatProxyPayload | null;
   return streamChatProxy(payload ?? {}, headers as unknown as Record<string, string>);
 }

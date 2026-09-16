@@ -8,36 +8,31 @@ import { translateExactText, useUserLang } from "@/lib/authI18n";
 
 type LinkItem = { label: string; href: string; external?: boolean };
 
+// Only live destinations belong here — retired marketing routes silently
+// redirect to /chat, which reads as a broken footer link.
 const columns: { title: string; links: LinkItem[] }[] = [
   {
     title: "Product",
     links: [
       { label: "AI Chat", href: "/chat" },
-      { label: "Image Generation", href: "/images" },
-      { label: "Video Generation", href: "/videos" },
-      { label: "Megsy PR", href: "/build" },
       { label: "Pricing", href: "/pricing" },
-      { label: "Enterprise", href: "/enterprise" },
-    ],
-  },
-  {
-    title: "Resources",
-    links: [
-      { label: "Features Guide", href: "/features-guide" },
-      { label: "Megsy vs ChatGPT", href: "/vs/chatgpt" },
-      { label: "Megsy vs Midjourney", href: "/vs/midjourney" },
-      { label: "Megsy vs Lovable", href: "/vs/lovable" },
+      { label: "Restore Purchase", href: "/restore" },
     ],
   },
   {
     title: "Company",
     links: [
       { label: "About", href: "/about" },
-      { label: "Support", href: "/support" },
       { label: "Contact", href: "/contact" },
       { label: "Security", href: "/security" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
       { label: "Terms", href: "/terms" },
       { label: "Privacy", href: "/privacy" },
+      { label: "Refunds", href: "/refund" },
     ],
   },
 ];
