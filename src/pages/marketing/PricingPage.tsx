@@ -192,11 +192,13 @@ const PricingPage = () => {
       return;
     }
 
-    // Egypt edition or an Arabic account: Kashier (card + wallets) — show the picker.
-    if (isEgMode() || isArabBilling()) {
+    // Egypt edition, an Arabic account, or an Arab-region visitor: Kashier
+    // (card + wallets) — show the picker.
+    if (isEgMode() || isArabBilling() || arabRegion || isArabRegion()) {
       setGatewaySheet({ tier, interval, trial: opts.trial === true });
       return;
     }
+
     await runCheckout("global", { tier, interval, trial: opts.trial === true });
   };
 
