@@ -398,7 +398,17 @@ const PricingPage = () => {
             {/* Plans */}
             <section id="plans-grid" className="mt-10 grid gap-5 sm:grid-cols-2">
               {PLANS.filter((p) => p.tier === "pro" || p.tier === "elite").map((plan) => {
-                const price = getDisplayPrice(plan, isYearly);
+                const fallbackPrice = getDisplayPrice(plan, isYearly);
+                const catalogEntry = priceFor(
+                  catalog,
+                  plan.tier === "elite" ? "elite" : "pro",
+                  isYearly ? "yearly" : "monthly",
+                  { winback: winbackOffer },
+                );
+                const price = catalogEntry
+                  ? { ...fallbackPrice, price: catalogEntry.usd }
+                  : fallbackPrice;
+
                 const highlights = PLAN_HIGHLIGHTS[plan.tier === "pro" ? "pro" : "max"];
                 const busy = loadingTier === plan.tier;
                 const featured = plan.tier === "pro";
