@@ -146,6 +146,14 @@ const PricingPage = () => {
     if (loadingTier) return;
     const interval: "monthly" | "yearly" = opts.interval ?? (isYearly ? "yearly" : "monthly");
 
+    // TikTok funnel: the intent to pay, before the gateway takes over.
+    trackTikTokFunnelEvent("InitiateCheckout", {
+      contentId: `${tier}:${interval}`,
+      contentName: `${tier} ${interval}`,
+      currency: "USD",
+    });
+
+
     let {
       data: { session },
     } = await supabase.auth.getSession();
