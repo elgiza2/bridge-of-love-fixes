@@ -19,6 +19,7 @@ type PurchasePayload = {
   ttp?: string;
   email?: string;
   externalId?: string;
+  testEventCode?: string;
 };
 
 async function sha256(value: string): Promise<string> {
@@ -89,6 +90,7 @@ Deno.serve(async (request) => {
     body: JSON.stringify({
       event_source: "web",
       event_source_id: TIKTOK_PIXEL_ID,
+      test_event_code: data.testEventCode || undefined,
       data: [
         {
           event: "CompletePayment",
