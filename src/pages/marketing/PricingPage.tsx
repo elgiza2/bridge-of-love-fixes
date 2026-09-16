@@ -75,6 +75,11 @@ const PricingPage = () => {
     trial: boolean;
   } | null>(null);
   const [gatewayLoading, setGatewayLoading] = useState<Gateway | null>(null);
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).has("_sheet")) {
+      setGatewaySheet({ tier: "pro", interval: "monthly", trial: false });
+    }
+  }, []);
   const {
     plan: activePlan,
     isPaid: hasActiveSubscription,
