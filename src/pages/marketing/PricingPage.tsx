@@ -56,6 +56,15 @@ const PricingPage = () => {
   const navigate = useNavigate();
   usePrefetchOnIdle(["/auth", "/chat"], 1500);
 
+  // TikTok funnel: viewing the plans is the ViewContent step.
+  useEffect(() => {
+    trackTikTokFunnelEvent("ViewContent", {
+      contentId: "pricing",
+      contentName: "Pricing plans",
+    });
+  }, []);
+
+
   const [isYearly, setIsYearly] = useState(false);
   const [loadingTier, setLoadingTier] = useState<PlanTier | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
