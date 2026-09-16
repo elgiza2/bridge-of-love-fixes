@@ -99,7 +99,6 @@ Deno.serve(async (request) => {
       updated_at: new Date().toISOString(),
     })
     .eq("order_id", orderId)
-    .eq("status", "pending")
     .select("id, status, amount, currency, credits, plan, user_id")
     .maybeSingle();
 
@@ -108,7 +107,7 @@ Deno.serve(async (request) => {
   // The browser copy of CompletePayment only fires when the buyer actually
   // lands back on the success page. This server copy is authoritative and
   // shares the same event_id, so TikTok deduplicates the two.
-  if (updated && updated.status === "paid") {
+  if (updated && nextStatus === "paid") {
     await sendTikTokPurchase({
       eventId: orderId,
       value: Number(updated.amount),
