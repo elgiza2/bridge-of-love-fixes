@@ -32,7 +32,7 @@ import {
 import { AppRoutes } from "@/routes-app/AppRoutes";
 import { applyTheme } from "@/lib/theme";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
-import { loadTikTokPixel } from "@/lib/analytics/tiktokPixel";
+import { loadTikTokPixel, trackTikTokFunnelEvent } from "@/lib/analytics/tiktokPixel";
 
 /** Watches background jobs / agent runs and notifies the user when they finish. */
 const BackgroundJobNotifier = lazyWithRetry(

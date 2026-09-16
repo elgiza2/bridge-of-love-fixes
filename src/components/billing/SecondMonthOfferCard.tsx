@@ -12,6 +12,7 @@ import { invokeFunction } from "@/lib/supabaseFunction";
 import { SECOND_MONTH_OFFER } from "@/data/pricingData";
 import { isEgMode } from "@/lib/egMode";
 import { isArabBilling } from "@/lib/payRegion";
+import { trackTikTokFunnelEvent } from "@/lib/analytics/tiktokPixel";
 
 interface Props {
   /** Tier the user just subscribed to. */
