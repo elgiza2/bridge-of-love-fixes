@@ -107,7 +107,7 @@ Deno.serve(async (request) => {
       test_event_code: data.testEventCode || undefined,
       data: [
         {
-          event: "CompletePayment",
+          event: eventName,
           event_time: Math.floor(Date.now() / 1000),
           event_id: data.eventId,
           user,
