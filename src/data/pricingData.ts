@@ -235,19 +235,19 @@ export const ENTERPRISE_FEATURES: string[] = [
 export const SERVICES_GUIDE: { name: string; desc: string }[] = [
   {
     name: "Cloud Computer",
-    desc: "Megsy drives a real cloud browser and desktop — it clicks, types, fills forms, downloads files and finishes the job while you watch. Included on Pro; Max gets longer sessions and parallel machines.",
+    desc: "Megsy drives a real cloud browser and desktop — it clicks, types, fills forms, downloads files and finishes the job while you watch. Included on Pro.",
   },
   {
     name: "Long-Running Tasks",
-    desc: "Hand over work that takes hours. Tasks keep running after you close the app and pick up where they stopped — up to 4 hours on Pro and 12 hours on Max, with automatic recovery.",
+    desc: "Hand over work that takes hours. Tasks keep running after you close the app and pick up where they stopped — up to 4 hours, with automatic recovery.",
   },
   {
     name: "Background Agents",
-    desc: "Agents work in parallel on separate jobs and report back when done. 3 in parallel on Pro, unlimited on Max.",
+    desc: "Agents work in parallel on separate jobs and report back when done. Up to 3 in parallel on Pro.",
   },
   {
     name: "Unlimited Chat",
-    desc: "Talk to Megsy AI with every flagship model and no daily caps on Pro and Max. The free plan uses Megsy Lite.",
+    desc: "Talk to Megsy AI with every flagship model and no daily caps on Pro. The free plan uses Megsy Lite.",
   },
   {
     name: "Image Generation",
