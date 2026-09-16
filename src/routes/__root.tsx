@@ -340,6 +340,23 @@ const ADROLL_SCRIPT = `
     } catch (e) { return; }
     if (window.__adroll_loaded) return;
     var w = window, d = document;
+    // Consent was already collected by Megsy's own banner: suppress the
+    // AdRoll/NextRoll (Didomi) dialog, which otherwise overlays the whole app
+    // and swallows clicks on the chat composer and the checkout buttons.
+    try {
+      var cs = d.createElement('style');
+      cs.textContent = '#adroll_consent_container,#adroll_consent_banner,#didomi-host,.didomi-popup-open,.adroll_consent_container{display:none!important;pointer-events:none!important;visibility:hidden!important}';
+      d.head.appendChild(cs);
+      var strip = function(){
+        var nodes = d.querySelectorAll('#adroll_consent_container,#didomi-host');
+        for (var i = 0; i < nodes.length; i++) { try { nodes[i].remove(); } catch (er) {} }
+        d.documentElement.classList.remove('didomi-popup-open');
+        d.body && d.body.classList.remove('didomi-popup-open');
+      };
+      new MutationObserver(strip).observe(d.documentElement, { childList: true, subtree: true });
+      strip();
+    } catch (er) {}
+
     w.adroll_adv_id = "U7L76NUFIBDU5JJZWFGSPY";
     w.adroll_pix_id = "YH6HQKQYMVBAFP6KK4M5WU";
     w.adroll_version = "2.0";
