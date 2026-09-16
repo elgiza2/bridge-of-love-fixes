@@ -36,6 +36,11 @@ const CookieConsent = () => {
   const handleChoice = (choice: string) => {
     localStorage.setItem("megsy_cookies_accepted", choice);
     setVisible(false);
+    // Tell the AdRoll/NextRoll pixel (see src/routes/__root.tsx) that consent
+    // was granted, so retargeting starts without its own consent dialog.
+    if (choice === "true") {
+      window.dispatchEvent(new Event("megsy:cookies-accepted"));
+    }
   };
 
   // Hide on chat/workspace surfaces where it would overlap the mobile composer.
