@@ -366,6 +366,9 @@ const ADROLL_SCRIPT = `
     };
     w.addEventListener("megsy:navigation", onNav);
     w.addEventListener("popstate", onNav);
+    // If consent arrives after boot (user clicks Accept in the Megsy banner),
+    // start the pixel then.
+    w.addEventListener("megsy:cookies-accepted", start);
   };
   if (window.requestIdleCallback) requestIdleCallback(start, { timeout: 4000 });
   else setTimeout(start, 2500);
