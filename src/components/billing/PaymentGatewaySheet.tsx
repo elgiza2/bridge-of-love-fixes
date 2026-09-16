@@ -188,7 +188,6 @@ function PaymentGatewaySheetImpl({
           {visible.map((row, i) => {
             const isLoading = loading === row.id;
             const disabled = loading !== null && !isLoading;
-            const Icon = row.id === "wallets" ? Smartphone : CreditCard;
             const label = labels?.[row.id] ?? (isArabic ? row.labelAr : row.label);
             const caption = isArabic ? row.captionAr : row.caption;
             return (
@@ -204,9 +203,7 @@ function PaymentGatewaySheetImpl({
                   i > 0 ? "border-t border-border/50" : ""
                 }`}
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted/70">
-                  <Icon className="h-[17px] w-[17px] text-foreground/70" strokeWidth={1.6} />
-                </span>
+                <RowIcon id={row.id} />
                 <span className="flex min-w-0 flex-1 flex-col gap-1">
                   <span className="truncate text-[16px] font-semibold leading-tight text-foreground">
                     {label}
