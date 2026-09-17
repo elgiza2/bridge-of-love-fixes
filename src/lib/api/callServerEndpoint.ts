@@ -21,7 +21,10 @@ const EDGE_FUNCTION_NAMES: Record<string, string> = {
  * model/search provider keys live only in Supabase function secrets, so the
  * local `/api/*` handler would fail with a "not configured" error.
  */
-const ALWAYS_EDGE = new Set(["deep-research"]);
+// Deep Research has a Vercel server route with the current streaming adapter.
+// The older Supabase edge function can return the preamble but never finish
+// the report, so production must use the same-origin route.
+const SAME_ORIGIN_ENDPOINTS = new Set(["deep-research"]);
 
 /**
  * POSTs JSON to `/api/<name>` in dev, or to the deployed edge function of the
@@ -33,7 +36,7 @@ export async function callServerEndpoint(name: keyof typeof EDGE_FUNCTION_NAMES 
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
 
-  if (import.meta.env.DEV && !ALWAYS_EDGE.has(String(name))) {
+  if (import.meta.env.DEV || SAME_ORIGIN_ENDPOINTS.has(String(name))) {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
     return fetch(`/api/${name}`, {
