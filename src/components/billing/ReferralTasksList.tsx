@@ -18,6 +18,7 @@ export default function ReferralTasksList({ className = "" }: { className?: stri
 
   const tasks = milestone.tasks;
   if (tasks.length === 0) return null;
+  const requiredStepsLabel = lang === "ar-eg" ? "الخطوات المطلوبة" : copy("Required steps");
 
   const run = async (key: string, url: string | null) => {
     if (url) window.open(url, "_blank", "noopener,noreferrer");
@@ -40,7 +41,7 @@ export default function ReferralTasksList({ className = "" }: { className?: stri
         aria-expanded={open}
         className="flex w-full items-center justify-center gap-2 rounded-full border border-border bg-foreground/[0.03] px-4 py-2.5 text-[13.5px] font-medium text-foreground transition hover:bg-foreground/[0.07]"
       >
-        <span>{copy("Required steps")}</span>
+        <span>{requiredStepsLabel}</span>
         <span className="tabular-nums text-muted-foreground" dir="ltr">
           {doneCount}/{tasks.length}
         </span>
