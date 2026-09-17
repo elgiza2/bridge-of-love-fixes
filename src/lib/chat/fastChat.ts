@@ -22,6 +22,8 @@ export function isFastLaneEligible(opts: {
   computerUseEnabled?: boolean;
   activeAgent?: string;
   activeSkill?: unknown;
+  /** Full lane is required when the user's MCP/apps context is non-empty. */
+  hasConnectedTools?: boolean;
 }): boolean {
   const { messages } = opts;
   // NOTE: the search flag must NOT block the fast lane. The web-search toggle
@@ -29,7 +31,7 @@ export function isFastLaneEligible(opts: {
   // so this used to send every simple message down the slow path (~9s).
   // `chat-fast` escalates by itself whenever a turn really needs live data.
   if (opts.deepResearch || opts.computerUseEnabled) return false;
-  if (opts.activeAgent || opts.activeSkill) return false;
+  if (opts.activeAgent || opts.activeSkill || opts.hasConnectedTools) return false;
   // The chat page sends `normal` for a plain turn; `chat` is the legacy name.
   const mode = String(opts.chatMode || "normal").toLowerCase();
   if (mode !== "chat" && mode !== "normal") return false;
@@ -85,7 +87,10 @@ export async function tryFastChat({
   const onOuterAbort = () => ctl.abort();
   signal?.addEventListener("abort", onOuterAbort, { once: true });
   const reqSignal = ctl.signal;
-  let headersTimer: ReturnType<typeof setTimeout> | null = setTimeout(() => ctl.abort(), HEADERS_MS);
+  let headersTimer: ReturnType<typeof setTimeout> | null = setTimeout(
+    () => ctl.abort(),
+    HEADERS_MS,
+  );
   const clearHeadersTimer = () => {
     if (headersTimer) clearTimeout(headersTimer);
     headersTimer = null;
@@ -110,51 +115,56 @@ export async function tryFastChat({
     if (import.meta.env.VITE_LOCAL_CHAT_PROXY !== "1") throw new Error("PROXY_DISABLED");
     resp = await viaProxy();
     if (!resp.ok || !(resp.headers.get("content-type") || "").includes("text/event-stream")) {
-      try { await resp.body?.cancel(); } catch { /* ignore */ }
-      throw new Error("PROXY_UNAVAILABLE");
-    }
-  } catch (proxyError) {
-    if (signal?.aborted) { clearHeadersTimer(); signal?.removeEventListener("abort", onOuterAbort); throw proxyError; }
-    if (reqSignal.aborted) {
-      clearHeadersTimer();
-      signal?.removeEventListener("abort", onOuterAbort);
-      return "escalate";
-    }
-  try {
-    resp = await fetch(FAST_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: edgeAnonKey("chat-fast"),
-        Authorization: `Bearer ${authToken}`,
-        "x-anon-fingerprint": fingerprint,
-      },
-      body: JSON.stringify({
-        messages,
-        thinking: thinking === true,
-        ...(force ? { force: true, maxTokens: 8192 } : maxTokens ? { maxTokens } : {}),
-      }),
-      signal: reqSignal,
-    });
-    if (resp.status >= 500 || resp.status === 404) {
       try {
         await resp.body?.cancel();
       } catch {
         /* ignore */
       }
-      resp = await viaProxy();
+      throw new Error("PROXY_UNAVAILABLE");
     }
-  } catch (e) {
-    clearHeadersTimer();
-    signal?.removeEventListener("abort", onOuterAbort);
-    if (signal?.aborted) throw e;
-    return "escalate";
-  }
+  } catch (proxyError) {
+    if (signal?.aborted) {
+      clearHeadersTimer();
+      signal?.removeEventListener("abort", onOuterAbort);
+      throw proxyError;
+    }
+    if (reqSignal.aborted) {
+      clearHeadersTimer();
+      signal?.removeEventListener("abort", onOuterAbort);
+      return "escalate";
+    }
+    try {
+      resp = await fetch(FAST_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: edgeAnonKey("chat-fast"),
+          Authorization: `Bearer ${authToken}`,
+          "x-anon-fingerprint": fingerprint,
+        },
+        body: JSON.stringify({
+          messages,
+          thinking: thinking === true,
+          ...(force ? { force: true, maxTokens: 8192 } : maxTokens ? { maxTokens } : {}),
+        }),
+        signal: reqSignal,
+      });
+      if (resp.status >= 500 || resp.status === 404) {
+        try {
+          await resp.body?.cancel();
+        } catch {
+          /* ignore */
+        }
+        resp = await viaProxy();
+      }
+    } catch (e) {
+      clearHeadersTimer();
+      signal?.removeEventListener("abort", onOuterAbort);
+      if (signal?.aborted) throw e;
+      return "escalate";
+    }
   }
   clearHeadersTimer();
-
-
-
 
   const contentType = resp.headers.get("content-type") || "";
   if (!resp.ok || !resp.body || !contentType.includes("text/event-stream")) {
@@ -255,8 +265,16 @@ export async function tryFastChat({
     if ((e as Error)?.message === "__FAST_IDLE__") {
       // The provider went silent mid-stream: stop waiting instead of leaving
       // the UI thinking forever.
-      try { ctl.abort(); } catch { /* ignore */ }
-      try { await reader.cancel(); } catch { /* ignore */ }
+      try {
+        ctl.abort();
+      } catch {
+        /* ignore */
+      }
+      try {
+        await reader.cancel();
+      } catch {
+        /* ignore */
+      }
       return emitted ? "answered" : "escalate";
     }
     if (emitted) return "answered";
@@ -264,7 +282,6 @@ export async function tryFastChat({
   } finally {
     signal?.removeEventListener("abort", onOuterAbort);
   }
-
 
   if (!sawAnyPayload && !emitted) return "escalate";
   return "answered";

@@ -38,8 +38,6 @@ function isTrivialTurn(messages: { role: string; content: unknown }[]): boolean 
   );
 }
 
-
-
 export const GUEST_QUOTA_ERROR = "GUEST_QUOTA_EXCEEDED";
 
 /**
@@ -47,7 +45,9 @@ export const GUEST_QUOTA_ERROR = "GUEST_QUOTA_EXCEEDED";
  * into one clear sentence instead of a wall of provider text.
  */
 function friendlyUpstreamError(raw: string): string {
-  if (/Arrearage|overdue.?payment|in good standing|insufficient.?balance|quota.?exceeded/i.test(raw)) {
+  if (
+    /Arrearage|overdue.?payment|in good standing|insufficient.?balance|quota.?exceeded/i.test(raw)
+  ) {
     return "رصيد مزوّد الموديلات (Alibaba Model Studio) منتهي أو الحساب متوقف عن السداد — اشحن الحساب أو أضف مفتاحًا جديدًا وهيرجع الشات فورًا.";
   }
   if (/invalid.?api.?key|Unauthorized|InvalidApiKey/i.test(raw)) {
@@ -57,9 +57,7 @@ function friendlyUpstreamError(raw: string): string {
     return "ضغط مؤقت على مزوّد الموديلات — جرّب تاني بعد لحظات.";
   }
   const clean = raw.trim();
-  return clean.length > 200 || /^\s*[{[]/.test(clean)
-    ? "الشات مش متاح مؤقتًا. جرّب تاني."
-    : clean;
+  return clean.length > 200 || /^\s*[{[]/.test(clean) ? "الشات مش متاح مؤقتًا. جرّب تاني." : clean;
 }
 
 type MsgContent = string | Array<{ type: string; text?: string; image_url?: { url: string } }>;
@@ -191,7 +189,11 @@ export async function streamChat({
   onEvent?: (payload: { event: string; [k: string]: any }) => void;
   onReasoning?: (deltaText: string) => void;
   /** Fires with token usage stats whenever the upstream sends them. */
-  onUsage?: (usage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number }) => void;
+  onUsage?: (usage: {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    total_tokens?: number;
+  }) => void;
   /** Fires once with the actual model id that produced the response (from x-model-used header or first SSE frame). */
   onModel?: (model: string) => void;
   signal?: AbortSignal;
@@ -313,7 +315,6 @@ export async function streamChat({
     }
   }
 
-
   let receivedAnyContent = false;
   const origOnDelta = onDelta;
   onDelta = (chunk: string) => {
@@ -321,11 +322,28 @@ export async function streamChat({
     origOnDelta(chunk);
   };
 
+  // The lightweight lane skips the per-user preflight. That is fine for
+  // ordinary chat, but it would hide connected apps and MCP servers from the
+  // model. Resolve a cached context snapshot before choosing the lane so a
+  // Gmail/MCP request always reaches the full agent with its tools attached.
+  let hasConnectedTools = false;
+  if (user_id) {
+    try {
+      const { fetchTurnContext } = await import("@/lib/chat/turnContext");
+      const ctx = await fetchTurnContext();
+      hasConnectedTools = Boolean(
+        ctx.mcpServers.length || ctx.connectedApps.length || ctx.apiApps.length,
+      );
+    } catch {
+      hasConnectedTools = false;
+    }
+  }
+
   // Rescue: the full chat path can stall before it emits a single byte (heavy
   // build/task prompts). Rather than leaving the user on an endless
   // "Thinking…", we stream the answer from the fast Alibaba model instead.
   const rescueWithFastChat = async (): Promise<boolean> => {
-    if (receivedAnyContent) return false;
+    if (receivedAnyContent || hasConnectedTools) return false;
     try {
       const outcome = await tryFastChat({
         messages,
@@ -338,14 +356,12 @@ export async function streamChat({
         onReasoning,
         thinking: deepThinkingEnabled(),
         force: true,
-
       });
       return outcome === "answered" && receivedAnyContent;
     } catch {
       return false;
     }
   };
-
 
   // ── Fast lane ───────────────────────────────────────────────────────────
   // Simple, tool-free turns go to the lightweight `chat-fast` function first
@@ -361,6 +377,7 @@ export async function streamChat({
         computerUseEnabled,
         activeAgent,
         activeSkill,
+        hasConnectedTools,
       })
     ) {
       const outcome = await tryFastChat({
@@ -395,7 +412,6 @@ export async function streamChat({
   }
 
   try {
-
     let completed = false;
     // Everything below is pre-flight work: it must all finish before the first
     // byte can be requested, so it runs in parallel instead of sequentially.
@@ -409,7 +425,9 @@ export async function streamChat({
     // verbatim when present.
     // User-configured context (knowledge, tool servers, connected apps,
     // browser session preferences) — collected once per turn.
-    let turnCtx: Awaited<ReturnType<typeof import("@/lib/chat/turnContext").fetchTurnContext>> | null = null;
+    let turnCtx: Awaited<
+      ReturnType<typeof import("@/lib/chat/turnContext").fetchTurnContext>
+    > | null = null;
     let turnCtxBrief = "";
     let turnCtxPayload: Record<string, unknown> = {};
     let authToken = await tokenPromise;
@@ -440,9 +458,9 @@ export async function streamChat({
       // otherwise the model answers like the plain site assistant.
       const promptMode = deepResearch ? "deep-research" : chatMode;
       customSystem = mod.buildCustomSystem(promptMode, selectedModel?.id, learnState);
-      const { CAPABILITIES_BRIEF, buildDateBrief, SUPERVISOR_BRIEF } =
-        await capabilitiesModPromise;
-      customSystem = `${customSystem || ""}\n\n${buildDateBrief()}\n\n${CAPABILITIES_BRIEF}\n\n${SUPERVISOR_BRIEF}`.trim();
+      const { CAPABILITIES_BRIEF, buildDateBrief, SUPERVISOR_BRIEF } = await capabilitiesModPromise;
+      customSystem =
+        `${customSystem || ""}\n\n${buildDateBrief()}\n\n${CAPABILITIES_BRIEF}\n\n${SUPERVISOR_BRIEF}`.trim();
       if (turnCtxBrief) customSystem = `${customSystem}\n\n${turnCtxBrief}`.trim();
       if (chatMode !== "images" && chatMode !== "video") {
         const { chatModelPreferenceHint } = await import("@/lib/chatModelPreferences");
@@ -455,38 +473,42 @@ export async function streamChat({
     // Assign a fresh resume id per turn so the server can persist stream
     // chunks and the client can fetch the tail after a network drop.
     const resumeId =
-      (typeof crypto !== "undefined" && "randomUUID" in crypto
+      typeof crypto !== "undefined" && "randomUUID" in crypto
         ? crypto.randomUUID()
-        : `r-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`);
-    try { onEvent?.({ event: "resume_id", resumeId }); } catch { /* ignore */ }
+        : `r-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    try {
+      onEvent?.({ event: "resume_id", resumeId });
+    } catch {
+      /* ignore */
+    }
     const requestBody = JSON.stringify({
-        // Deep Research streams straight through: the server-side resume
-        // buffer stalls long research turns, so we skip it in that mode.
-        resume_id: deepResearch ? undefined : resumeId,
+      // Deep Research streams straight through: the server-side resume
+      // buffer stalls long research turns, so we skip it in that mode.
+      resume_id: deepResearch ? undefined : resumeId,
 
-        messages,
-        model,
-        tier,
-        // Deep Research runs fully inside our own agent: we already fetched and
-        // injected the live sources, so the backend web tool stays OFF (it
-        // stalls long research turns).
-        searchEnabled,
-        chatMode,
-        user_id,
-        conversation_id,
-        computerUseEnabled,
-        activeAgent,
-        selectedModel,
-        activeSkill,
-        availableSkills,
-        customSystem,
-        // Deep-thinking toggle: the backend turns the model's reasoning stream
-        // on so the UI's thinking panel has real content.
-        thinking: deepThinkingEnabled(),
+      messages,
+      model,
+      tier,
+      // Deep Research runs fully inside our own agent: we already fetched and
+      // injected the live sources, so the backend web tool stays OFF (it
+      // stalls long research turns).
+      searchEnabled,
+      chatMode,
+      user_id,
+      conversation_id,
+      computerUseEnabled,
+      activeAgent,
+      selectedModel,
+      activeSkill,
+      availableSkills,
+      customSystem,
+      // Deep-thinking toggle: the backend turns the model's reasoning stream
+      // on so the UI's thinking panel has real content.
+      thinking: deepThinkingEnabled(),
 
-        ...turnCtxPayload,
-        zone: (typeof window !== "undefined" && (window as any).__MEGSY_ZONE__) || "megsy",
-      });
+      ...turnCtxPayload,
+      zone: (typeof window !== "undefined" && (window as any).__MEGSY_ZONE__) || "megsy",
+    });
     let resp: Response | null = null;
     // Primary runtime (dev only): this app's own serverless chat endpoint streams
     // the model's reasoning deltas. In production that path does not exist, so
@@ -509,7 +531,11 @@ export async function streamChat({
           // 503 = no local provider key in this environment. Remember that so
           // every later turn skips the dead probe instead of paying for it.
           if (primary.status === 503 || primary.status === 404) localChatProxyUsable = false;
-          try { await primary.body?.cancel(); } catch { /* ignore */ }
+          try {
+            await primary.body?.cancel();
+          } catch {
+            /* ignore */
+          }
         }
       } catch {
         /* fall through to the Supabase edge function */
@@ -539,7 +565,6 @@ export async function streamChat({
         if (resp.status === 401 && attempt === 0) {
           authToken = await refreshAccessToken();
           continue;
-
         }
         if (resp.status >= 500 && attempt < 2) {
           await new Promise((resolve) => setTimeout(resolve, 600 * (attempt + 1)));
@@ -566,7 +591,11 @@ export async function streamChat({
     // Second deployment path (dev only): when the Supabase edge function is
     // unreachable or failing, the same turn is served by this app's local
     // serverless runtime (`/api/chat`), which streams the identical SSE.
-    if (import.meta.env.DEV && localChatProxyUsable && (!resp || resp.status >= 500 || resp.status === 404)) {
+    if (
+      import.meta.env.DEV &&
+      localChatProxyUsable &&
+      (!resp || resp.status >= 500 || resp.status === 404)
+    ) {
       try {
         const proxied = await fetch("/api/chat", {
           method: "POST",
@@ -580,8 +609,6 @@ export async function streamChat({
       }
     }
     if (!resp) throw new Error("NETWORK_UNAVAILABLE");
-
-
 
     if (resp.status === 429) {
       onError?.("Rate limit exceeded. Please wait a moment and try again.");
@@ -637,7 +664,9 @@ export async function streamChat({
     try {
       const hdrModel = resp.headers.get("x-model-used");
       if (hdrModel) onModel?.(hdrModel);
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
 
     let terminalStreamError = false;
     const handlePayload = (parsed: any) => {
