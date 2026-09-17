@@ -2661,16 +2661,11 @@ const ChatPage = () => {
     const r = composerRef.current?.getBoundingClientRect();
     if (isMobileViewport) {
       const vh = window.innerHeight;
-      const composerTop = r?.top ?? vh - 96;
-      const composerH = r ? Math.max(0, vh - composerTop) : 96;
-      const isBigView = plusView === "skills" || plusView === "tools";
-      // Manus-style sheet: opens compact but shows header + first rows,
-      // then expands upward as the user scrolls.
-      const expandedCap = isBigView ? vh * 0.9 : vh * 0.5;
-      const minH = isBigView ? 400 : 178;
-      const collapsedH = Math.max(minH, Math.min(isBigView ? vh * 0.6 : 198, composerTop - 16));
-      const expandedH = Math.max(collapsedH, Math.min(expandedCap, vh - 40));
-      const collapsedY = expandedH - collapsedH;
+      // Open the tools panel as a proper full-height drawer. The previous
+      // compact snap point hid the photo/file cards behind the composer and
+      // made the menu look broken on short screens.
+      const expandedH = Math.max(360, Math.min(vh * 0.9, vh - 24));
+      const collapsedY = 0;
 
       return createPortal(
         <Suspense fallback={null}>
@@ -2679,7 +2674,7 @@ const ChatPage = () => {
             collapsedY={collapsedY}
             bottomOffset={0}
             onClose={() => setPlusMenuOpen(false)}
-            initialExpanded={plusView === "skills" || plusView === "tools"}
+            initialExpanded
             view={plusView}
           >
             {renderPlusContent()}
@@ -2689,11 +2684,11 @@ const ChatPage = () => {
       );
     }
 
-    const menuWidth = plusView === "skills" ? Math.min(420, window.innerWidth - 24) : 300;
+    const menuWidth = plusView === "skills" ? Math.min(440, window.innerWidth - 24) : 360;
     const left = r ? Math.max(12, Math.min(window.innerWidth - menuWidth - 12, r.left + 8)) : 24;
     const bottom = r ? window.innerHeight - r.top + 8 : 96;
     const availableAbove = r ? Math.max(260, r.top - 16) : 600;
-    const maxMenuHeight = Math.min(600, availableAbove);
+    const maxMenuHeight = Math.min(680, Math.max(360, availableAbove));
     return createPortal(
       <>
         {/* Desktop: backdrop to close on outside click */}
@@ -2709,7 +2704,7 @@ const ChatPage = () => {
           transition={{ duration: 0.16, ease: [0.22, 0.9, 0.3, 1] }}
           data-plus-menu
           onClick={(e) => e.stopPropagation()}
-          className={`hidden md:flex origin-bottom-left z-overlay rounded-2xl border overflow-y-auto overscroll-contain p-2 flex-col unified-menu-surface`}
+          className="hidden md:flex origin-bottom-left z-overlay min-h-0 flex-col overflow-y-auto overscroll-contain rounded-2xl border p-2 unified-menu-surface"
           style={{
             position: "fixed",
             left,
