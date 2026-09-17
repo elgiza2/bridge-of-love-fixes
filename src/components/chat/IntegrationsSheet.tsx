@@ -217,17 +217,6 @@ export default function IntegrationsSheet({ open, onOpenChange }: Props) {
                         transition={SLIDE}
                         className="flex min-h-full flex-col"
                       >
-                        <div className="px-2 pb-3">
-                          <h2 className="text-start text-[19px] font-semibold tracking-tight text-foreground">
-                            {isArabic ? "التكاملات" : "Integrations"}
-                          </h2>
-                          <p className="mt-0.5 text-start text-[12.5px] text-muted-foreground">
-                            {isArabic
-                              ? "اربط تطبيقاتك ليستخدمها ميغسي داخل المحادثة"
-                              : "Connect your apps so Megsy can use them in chat"}
-                          </p>
-                        </div>
-
                         <div
                           data-connectors-search
                           className="mx-2 flex h-11 items-center gap-2.5 rounded-[14px] border border-border/70 bg-muted/40 px-3.5 shadow-sm"
