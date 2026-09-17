@@ -185,9 +185,7 @@ function PaymentGatewaySheetImpl({
           <p className="text-[20px] font-bold tracking-[-0.01em] leading-tight text-foreground">
             {resolvedTitle}
           </p>
-          <p className="mt-2 text-[14px] leading-relaxed text-foreground/65">
-            {resolvedSubtitle}
-          </p>
+          <p className="mt-2 text-[14px] leading-relaxed text-foreground/65">{resolvedSubtitle}</p>
         </div>
 
         <div className="flex flex-col overflow-hidden rounded-2xl border border-border/60">
@@ -245,4 +243,3 @@ function PaymentGatewaySheetImpl({
 
 const PaymentGatewaySheet = memo(PaymentGatewaySheetImpl);
 export default PaymentGatewaySheet;
-

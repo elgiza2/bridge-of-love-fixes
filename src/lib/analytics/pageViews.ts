@@ -60,6 +60,7 @@ async function visitorCountry(): Promise<string | null> {
     const country = typeof payload.country === "string" ? payload.country.toUpperCase() : null;
     if (!country || !/^[A-Z]{2}$/.test(country)) return null;
     sessionStorage.setItem(storageKey, country);
+    window.dispatchEvent(new CustomEvent("megsy:geo-country", { detail: country }));
     return country;
   } catch {
     return null;

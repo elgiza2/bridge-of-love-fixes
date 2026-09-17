@@ -66,7 +66,6 @@ const PricingPage = () => {
     });
   }, []);
 
-
   const [isYearly, setIsYearly] = useState(false);
   const [loadingTier, setLoadingTier] = useState<PlanTier | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -91,17 +90,19 @@ const PricingPage = () => {
   const [winbackOffer, setWinbackOffer] = useState(false);
   // The $1 / 3-day trial runs through the local (Kashier) gateway, so it is
   // only offered to Arab-region visitors.
-  const [arabRegion, setArabRegion] = useState(false);
+  const [arabRegion, setArabRegion] = useState(() => isArabRegion());
   useEffect(() => {
     setWinbackOffer(hasAbandonedCheckout());
     setArabRegion(isArabRegion());
+    const onGeoCountry = () => setArabRegion(isArabRegion());
+    window.addEventListener("megsy:geo-country", onGeoCountry);
+    return () => window.removeEventListener("megsy:geo-country", onGeoCountry);
   }, []);
   const introTrialEligible = useIntroTrialEligible();
   const trialEligible = arabRegion && introTrialEligible && trialAvailable(catalog);
   const [sidebarCollapsed] = useSidebarCollapsed();
   const PLANS = brandText(RAW_PLANS);
   const FAQS = brandText(RAW_FAQS).slice(0, FAQ_LIMIT);
-
 
   const t = isAr
     ? {
@@ -177,7 +178,6 @@ const PricingPage = () => {
       currency: "USD",
     });
 
-
     let {
       data: { session },
     } = await supabase.auth.getSession();
@@ -192,14 +192,21 @@ const PricingPage = () => {
       return;
     }
 
-    // Egypt edition, an Arabic account, or an Arab-region visitor: Kashier
-    // (card + wallets) — show the picker.
-    if (isEgMode() || isArabBilling() || arabRegion || isArabRegion()) {
-      setGatewaySheet({ tier, interval, trial: opts.trial === true });
+    // The $1/3-day trial is only sold through the local gateway. Keep this
+    // explicit so a delayed geo lookup can never send a trial to Dodo.
+    if (opts.trial === true) {
+      await runCheckout("local", { tier, interval, trial: true });
       return;
     }
 
-    await runCheckout("global", { tier, interval, trial: opts.trial === true });
+    // Egypt edition, an Arabic account, or an Arab-region visitor: Kashier
+    // (card + wallets) — show the picker.
+    if (isEgMode() || isArabBilling() || arabRegion || isArabRegion()) {
+      setGatewaySheet({ tier, interval, trial: false });
+      return;
+    }
+
+    await runCheckout("global", { tier, interval, trial: false });
   };
 
   const runCheckout = async (
@@ -243,9 +250,11 @@ const PricingPage = () => {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
 
-
       if (error) {
-        const msg = (error as any)?.message?.toLowerCase?.() || "";
+        const msg =
+          error instanceof Error
+            ? error.message.toLowerCase()
+            : String((error as { message?: unknown })?.message ?? "").toLowerCase();
         if (msg.includes("unauthorized") || msg.includes("401") || msg.includes("jwt")) {
           await supabase.auth.signOut().catch(() => {});
           toast.error("Your session expired. Please sign in again.");
@@ -259,9 +268,9 @@ const PricingPage = () => {
         markCheckoutOpened(interval);
         openCheckoutUrl(checkoutUrl);
       } else throw new Error(data?.error || "Checkout failed");
-
-    } catch (e: any) {
-      toast.error(e?.message || "Failed to open checkout. Please try again.");
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to open checkout. Please try again.";
+      toast.error(message);
     } finally {
       setGatewayLoading(null);
       setLoadingTier(null);
@@ -292,7 +301,6 @@ const PricingPage = () => {
           onSelect={runCheckout}
           loading={gatewayLoading}
           options={["local", "wallets", "global"]}
-
         />
       )}
     </Suspense>

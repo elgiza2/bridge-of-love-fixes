@@ -133,9 +133,10 @@ Deno.serve(async (request) => {
       );
     }
 
-
     const credits = Number(row.credits ?? 0);
-    const trialDays = Number(row.trial_days ?? 0);
+    // A catalog row may carry trial metadata, but a normal checkout must never
+    // become a trial unless the caller explicitly selected the trial offer.
+    const trialDays = trial ? Number(row.trial_days ?? 0) : 0;
     const orderId = `dodo_${crypto.randomUUID()}`;
     const site = (Deno.env.get("SITE_URL") || "https://megsyai.com").replace(/\/$/, "");
     const apiBase =
