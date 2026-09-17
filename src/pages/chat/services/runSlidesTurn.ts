@@ -292,15 +292,25 @@ export async function runSlidesTurn(args: RunSlidesTurnArgs): Promise<void> {
         if (Number.isFinite(n) && n >= 3 && n <= 30) return n;
       }
       if (!/slides?|شريحة|شرائح|سلايد/i.test(input)) return undefined;
+      // Do not use \b around Arabic words: JavaScript's word-boundary is
+      // ASCII-oriented and fails to match phrases such as "خمس شرائح".
       const words: Array<[RegExp, number]> = [
-        [/\b(?:three|ثلاث(?:ة)?|تلات(?:ة)?)\b/i, 3],
-        [/\b(?:four|أربع(?:ة)?|اربع(?:ة)?)\b/i, 4],
-        [/\b(?:five|خمس(?:ة)?|خمسة)\b/i, 5],
-        [/\b(?:six|ست(?:ة)?|ستة)\b/i, 6],
-        [/\b(?:seven|سبع(?:ة)?|سبعة)\b/i, 7],
-        [/\b(?:eight|ثمان(?:ية)?|تمانية)\b/i, 8],
-        [/\b(?:nine|تسع(?:ة)?|تسعة)\b/i, 9],
-        [/\b(?:ten|عشر(?:ة)?|عشرة)\b/i, 10],
+        [/(?:^|\s)(?:three)(?:\s|$)/i, 3],
+        [/(?:ثلاث|تلات)(?:ة)?/, 3],
+        [/(?:^|\s)(?:four)(?:\s|$)/i, 4],
+        [/(?:أربع|اربع)(?:ة)?/, 4],
+        [/(?:^|\s)(?:five)(?:\s|$)/i, 5],
+        [/(?:خمس(?:ة)?|خمسة)/, 5],
+        [/(?:^|\s)(?:six)(?:\s|$)/i, 6],
+        [/(?:ست(?:ة)?|ستة)/, 6],
+        [/(?:^|\s)(?:seven)(?:\s|$)/i, 7],
+        [/(?:سبع(?:ة)?|سبعة)/, 7],
+        [/(?:^|\s)(?:eight)(?:\s|$)/i, 8],
+        [/(?:ثمان(?:ية)?|تمانية)/, 8],
+        [/(?:^|\s)(?:nine)(?:\s|$)/i, 9],
+        [/(?:تسع(?:ة)?|تسعة)/, 9],
+        [/(?:^|\s)(?:ten)(?:\s|$)/i, 10],
+        [/(?:عشر(?:ة)?|عشرة)/, 10],
       ];
       return words.find(([pattern]) => pattern.test(input))?.[1];
     })();
