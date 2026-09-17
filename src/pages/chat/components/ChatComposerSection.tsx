@@ -1,6 +1,6 @@
 
 import { useEffect, useState, type ReactNode } from "react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import ComposerAttachments from "./ComposerAttachments";
 import { RemoteAiBusyBanner } from "./RemoteAiBusyBanner";
 import { MentionDropdown } from "./MentionDropdown";
@@ -11,6 +11,8 @@ import ComposerServicePanel from "./ComposerServicePanel";
 import StarterCards, { StarterChips } from "./StarterCards";
 
 import { ComposerComputerProvider } from "@/components/chat/ComposerComputerContext";
+import ComputerRunViewport from "@/components/chat/ComputerRunViewport";
+import { useComputerLiveView } from "@/lib/computer/liveView";
 
 import type { AttachedFile } from "../hooks/useAttachments";
 
@@ -52,6 +54,7 @@ interface ChatComposerSectionProps {
  * input, desktop integrations strip, and the desktop mode chips row.
  */
 export function ChatComposerSection(props: ChatComposerSectionProps) {
+  const computerView = useComputerLiveView();
   const {
     sidebarCollapsed,
     sidebarOffset,
@@ -135,7 +138,25 @@ export function ChatComposerSection(props: ChatComposerSectionProps) {
 
         <div className="relative mx-auto w-full max-w-3xl">
 
-          <div data-tour="composer" className="relative">
+            <div data-tour="composer" className="relative">
+            <AnimatePresence initial={false}>
+              {computerView?.active ? (
+                <motion.div
+                  key={computerView.id}
+                  initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                  className="pointer-events-auto mb-2 overflow-hidden rounded-3xl shadow-lg"
+                >
+                  <ComputerRunViewport
+                    url={computerView.url}
+                    poster={computerView.poster}
+                    active={computerView.active}
+                    status={computerView.status}
+                  />
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
             {mentionQuery && (
               <MentionDropdown
                 members={members}

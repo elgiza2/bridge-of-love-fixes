@@ -1,5 +1,6 @@
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { motion, useMotionValue, animate } from "framer-motion";
+import { X, Sparkles, Plug } from "lucide-react";
 
 interface DraggablePlusSheetProps {
   height: number;
@@ -266,6 +267,28 @@ export const DraggablePlusSheet = ({
           : "md:hidden"
       }`}
     >
+      <div
+        data-sheet-grip
+        className="shrink-0 border-b border-foreground/[0.08] bg-background/55 px-4 pb-3 pt-2.5 backdrop-blur-xl"
+      >
+        <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-foreground/20" aria-hidden="true" />
+        <div className="flex items-center gap-2">
+          <span className="grid h-8 w-8 place-items-center rounded-xl bg-primary/12 text-primary">
+            {sheetKind === "integrations" ? <Plug className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
+          </span>
+          <span className="min-w-0 flex-1 text-[14px] font-semibold text-foreground">
+            {sheetKind === "integrations" ? "Integrations & tools" : "Megsy tools"}
+          </span>
+          <button
+            type="button"
+            onClick={onClose}
+            className="grid h-8 w-8 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-foreground/[0.08] hover:text-foreground"
+            aria-label="Close menu"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
       <div
         ref={scrollRef}
         onScroll={onScroll}

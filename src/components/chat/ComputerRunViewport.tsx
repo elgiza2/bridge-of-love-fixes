@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import MegsyStar from "@/components/branding/MegsyStar";
 import { Button } from "@/components/ui/button";
+import { useUserLang } from "@/lib/authI18n";
 
 interface ComputerRunViewportProps {
   url?: string | null;
@@ -17,6 +18,7 @@ export default function ComputerRunViewport({
   status,
 }: ComputerRunViewportProps) {
   const [expanded, setExpanded] = useState(false);
+  const isArabic = useUserLang() === "ar-eg";
 
   return (
     <section
@@ -35,7 +37,7 @@ export default function ComputerRunViewport({
           className={`h-3.5 w-3.5 shrink-0 text-[var(--megsy-gold)] ${active ? "motion-safe:animate-[spin_4s_linear_infinite]" : ""}`}
         />
         <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-muted-foreground">
-          {status || (active ? "كومبيوتر ميغسي يعمل الآن" : "كومبيوتر ميغسي")}
+          {status || (active ? (isArabic ? "كمبيوتر ميغسي يعمل الآن" : "Megsy computer is working") : isArabic ? "كمبيوتر ميغسي" : "Megsy computer")}
         </span>
         <ChevronDown
           className={`h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}
@@ -49,7 +51,7 @@ export default function ComputerRunViewport({
         {url ? (
           <iframe
             src={url}
-            title="عرض كومبيوتر ميغسي"
+            aria-label={isArabic ? "عرض كمبيوتر ميغسي" : "Megsy computer preview"}
             className={`absolute inset-0 h-full w-full border-0 ${expanded ? "pointer-events-auto" : "pointer-events-none"}`}
             allow="clipboard-read; clipboard-write"
             sandbox="allow-scripts allow-same-origin allow-forms"

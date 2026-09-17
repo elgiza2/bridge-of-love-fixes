@@ -1624,7 +1624,9 @@ const ChatMessage = ({
             </Suspense>
           </div>
         ) : isThinking && !content && !showNarration ? (
-          null
+          <div className="my-1 rounded-2xl border border-primary/10 bg-primary/[0.035] px-3.5 py-2.5">
+            <ThinkingLoader searchStatus={searchStatus} />
+          </div>
         ) : isSavedCoderProject ? (
           <Suspense fallback={null}>
             <CoderProjectCard files={projectFiles} summary={coderSummary} projectId={messageId ? `msg:${messageId}` : undefined} />

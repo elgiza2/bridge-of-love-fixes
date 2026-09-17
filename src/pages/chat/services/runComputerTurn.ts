@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { stripComputerMention } from "@/lib/computer/shouldUseComputer";
 import type { Message, ToolPart } from "../chatConstants";
 import { PENDING_COMPUTER_RUN } from "@/lib/computer/activeRun";
+import { setComputerLiveView, clearComputerLiveView } from "@/lib/computer/liveView";
 import type { AttachedFile } from "../hooks/useAttachments";
 
 export interface RunComputerArgs {
@@ -72,6 +73,13 @@ Execution guardrails:
   // is already in flight before the provider hands back a run id.
   const { setActiveComputerRun, clearActiveComputerRun } = await import("@/lib/computer/activeRun");
   setActiveComputerRun(PENDING_COMPUTER_RUN);
+  setComputerLiveView({
+    id: PENDING_COMPUTER_RUN,
+    url: null,
+    poster: null,
+    status: null,
+    active: true,
+  });
 
   try {
     const cid = await createOrUpdateConversation(prompt || "Computer task");
@@ -176,11 +184,13 @@ Execution guardrails:
         ),
       );
       clearActiveComputerRun(PENDING_COMPUTER_RUN);
+      clearComputerLiveView(PENDING_COMPUTER_RUN);
       toast.error(msg);
       return;
     }
   } catch (e) {
     clearActiveComputerRun(PENDING_COMPUTER_RUN);
+    clearComputerLiveView(PENDING_COMPUTER_RUN);
     const msg = e instanceof Error ? e.message : "المهمة على الكمبيوتر فشلت";
     setMessages((prev) =>
       prev.map((m) =>
