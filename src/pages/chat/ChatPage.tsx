@@ -230,6 +230,7 @@ import { DOCS_STATUS_FALLBACKS } from "./chatUtils";
 const ChatPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const isArabic = typeof document !== "undefined" && document.documentElement.dir === "rtl";
 
   // Warm the Pricing route immediately after the chat surface mounts. The
   // pricing star is a top-level chat action, so waiting for requestIdleCallback
