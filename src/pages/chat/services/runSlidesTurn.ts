@@ -343,8 +343,13 @@ export async function runSlidesTurn(args: RunSlidesTurnArgs): Promise<void> {
     }
 
     const { jobId } = await startPlusAIPresentation({
-      topic: agentBrief || brief || userInput,
-      templateId: plan?.templateId || slidesTemplate,
+      topic: [
+        `Use the selected presentation template exactly: ${tplPicked.name}.`,
+        tplPicked.stylePrompt || tplPicked.description,
+        "Do not substitute another template, repeat one layout on every slide, or print the template name as slide content.",
+        agentBrief || brief || userInput,
+      ].join("\n\n"),
+      templateId: tplPicked.id,
       conversation_id: cid,
       message_id: placeholderId,
       language: lang,
@@ -503,6 +508,8 @@ export async function runSlidesTurn(args: RunSlidesTurnArgs): Promise<void> {
               slides?: string[];
               slideCount?: number;
             };
+            ss.templateName = tplPicked.name;
+            ss.colors = tplPicked.colors;
             const summaryText = await fetchSlidesNarration({
               mode: "summary",
               topic: slidesTopic,

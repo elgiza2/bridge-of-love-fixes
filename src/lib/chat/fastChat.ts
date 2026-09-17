@@ -31,10 +31,9 @@ export function isFastLaneEligible(opts: {
   // so this used to send every simple message down the slow path (~9s).
   // `chat-fast` escalates by itself whenever a turn really needs live data.
   if (opts.deepResearch || opts.computerUseEnabled) return false;
-  if (opts.activeAgent || opts.activeSkill || opts.hasConnectedTools) return false;
-  // The chat page sends `normal` for a plain turn; `chat` is the legacy name.
-  const mode = String(opts.chatMode || "normal").toLowerCase();
-  if (mode !== "chat" && mode !== "normal") return false;
+  // The fast agent is now the front door for every service. It receives a
+  // routing hint below and escalates to the full lane when a tool, file,
+  // browser, media or long-running task is required.
   if (!messages.length || messages.length > 60) return false;
   let total = 0;
   for (const m of messages) {
@@ -60,6 +59,7 @@ export async function tryFastChat({
   force,
   thinking,
   maxTokens,
+  routingContext,
 }: {
   messages: FastMsg[];
   authToken: string;
@@ -76,6 +76,8 @@ export async function tryFastChat({
   thinking?: boolean;
   /** Output budget for this turn (trivial turns use a small one for speed). */
   maxTokens?: number;
+  /** Non-secret service context used by the fast agent's router. */
+  routingContext?: string;
 }): Promise<FastChatOutcome> {
   let resp: Response;
   // Hard ceilings so a stalled provider can never leave the UI in a forever
@@ -100,6 +102,7 @@ export async function tryFastChat({
     lane: "fast",
     thinking: thinking === true,
     maxTokens: force ? 8192 : maxTokens,
+    ...(routingContext ? { routingContext } : {}),
   });
   /** Fallback runtime: this app's own serverless chat endpoint. */
   const viaProxy = () =>
@@ -145,6 +148,7 @@ export async function tryFastChat({
         body: JSON.stringify({
           messages,
           thinking: thinking === true,
+          ...(routingContext ? { routingContext } : {}),
           ...(force ? { force: true, maxTokens: 8192 } : maxTokens ? { maxTokens } : {}),
         }),
         signal: reqSignal,

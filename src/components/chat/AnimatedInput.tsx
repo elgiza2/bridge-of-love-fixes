@@ -454,11 +454,14 @@ const AnimatedInput = ({
               onClick={onPlusClick}
               variant="ghost"
               size="icon-sm"
-              className="animated-plus-btn relative z-[61] flex items-center justify-center h-10 w-10 text-muted-foreground hover:text-foreground hover:bg-foreground/[0.06] rounded-full transition-all duration-150 cursor-pointer active:scale-[0.9] shrink-0"
+              className="animated-plus-btn relative z-[61] flex h-9 min-w-9 items-center justify-center gap-1.5 rounded-[12px] border border-foreground/[0.08] bg-foreground/[0.035] px-2.5 text-muted-foreground shadow-sm transition-[background-color,border-color,transform,color] duration-150 hover:border-primary/30 hover:bg-primary/[0.08] hover:text-foreground active:scale-[0.96] shrink-0"
               aria-label={uiT("openTools")}
               data-plus-trigger
             >
-              <Plus className="w-[20px] h-[20px]" strokeWidth={1.9} />
+              <Plus className="h-[17px] w-[17px]" strokeWidth={2} />
+              <span className="hidden text-[11px] font-semibold sm:inline">
+                {isArabicUi ? "أدوات" : "Tools"}
+              </span>
             </Button>
 
             {(focused || hasText) && (

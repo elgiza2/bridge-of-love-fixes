@@ -132,18 +132,6 @@ const PlusMain = (p: PlusContentProps) => {
 
   const items: MenuItem[] = [
     {
-      id: "photos",
-      label: isArabic ? "إضافة صور" : "Add photos",
-      Icon: Images,
-      onClick: closeThen(() => p.imageInputRef.current?.click()),
-    },
-    {
-      id: "files",
-      label: isArabic ? "إضافة ملفات" : "Add files",
-      Icon: Paperclip,
-      onClick: closeThen(() => p.fileInputRef.current?.click()),
-    },
-    {
       id: "search",
       label: isArabic ? "البحث في الويب" : "Web search",
       Icon: Globe,
@@ -179,6 +167,34 @@ const PlusMain = (p: PlusContentProps) => {
           <p className="mt-0.5 text-[11.5px] text-muted-foreground">
             {isArabic ? "أضف ملفات أو فعّل أدوات المحادثة" : "Add files or turn on chat tools"}
           </p>
+        </div>
+        <div className="grid grid-cols-2 gap-2 px-1 pb-2">
+          <button
+            data-no-neo
+            type="button"
+            onClick={closeThen(() => p.imageInputRef.current?.click())}
+            className="group flex min-h-[92px] flex-col items-start justify-between rounded-[16px] border border-foreground/[0.08] bg-foreground/[0.04] p-3 text-start transition-[background-color,transform,border-color] duration-150 hover:border-primary/30 hover:bg-primary/[0.08] active:scale-[0.98]"
+          >
+            <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-primary/12 text-primary">
+              <Images className="h-[18px] w-[18px]" strokeWidth={1.9} />
+            </span>
+            <span className="text-[13px] font-semibold text-foreground">
+              {isArabic ? "الصور" : "Images"}
+            </span>
+          </button>
+          <button
+            data-no-neo
+            type="button"
+            onClick={closeThen(() => p.fileInputRef.current?.click())}
+            className="group flex min-h-[92px] flex-col items-start justify-between rounded-[16px] border border-foreground/[0.08] bg-foreground/[0.04] p-3 text-start transition-[background-color,transform,border-color] duration-150 hover:border-primary/30 hover:bg-primary/[0.08] active:scale-[0.98]"
+          >
+            <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-foreground/[0.08] text-foreground/80">
+              <Paperclip className="h-[18px] w-[18px]" strokeWidth={1.9} />
+            </span>
+            <span className="text-[13px] font-semibold text-foreground">
+              {isArabic ? "الملفات" : "Files"}
+            </span>
+          </button>
         </div>
         {items.map((item) => (
           <div

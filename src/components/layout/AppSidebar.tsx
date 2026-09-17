@@ -1301,7 +1301,7 @@ const AppSidebar = ({
       stripZonePrefix(window.location.pathname).startsWith("/referrals"));
 
   return (
-    <AnimatePresence>
+    <AnimatePresence initial={false} mode="sync">
       {open && (
         <>
           <motion.div

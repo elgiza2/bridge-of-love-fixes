@@ -356,6 +356,12 @@ export async function streamChat({
         onReasoning,
         thinking: deepThinkingEnabled(),
         force: true,
+        routingContext: [
+          `mode=${chatMode || "normal"}`,
+          activeAgent ? `agent=${activeAgent}` : "",
+          activeSkill ? "skill=enabled" : "",
+          "escalate to the full service lane when tools, files, browsing, media, code, slides, or integrations are required",
+        ].filter(Boolean).join("; "),
       });
       return outcome === "answered" && receivedAnyContent;
     } catch {
@@ -391,6 +397,13 @@ export async function streamChat({
         onReasoning,
         thinking: deepThinkingEnabled() && !isTrivialTurn(messages),
         ...(isTrivialTurn(messages) ? { maxTokens: 700 } : {}),
+        routingContext: [
+          `mode=${chatMode || "normal"}`,
+          activeAgent ? `agent=${activeAgent}` : "",
+          activeSkill ? "skill=enabled" : "",
+          hasConnectedTools ? "connected_integrations=available" : "",
+          "you are the front-door router; escalate to the full agent for tools, files, browsing, images, video, slides, code, or integrations",
+        ].filter(Boolean).join("; "),
       });
 
       if (outcome === "answered") {
