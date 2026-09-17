@@ -1624,7 +1624,7 @@ const ChatMessage = ({
             </Suspense>
           </div>
         ) : isThinking && !content && !showNarration ? (
-          <div className="my-1 rounded-2xl border border-primary/10 bg-primary/[0.035] px-3.5 py-2.5">
+          <div className="my-1 px-1 py-1">
             <ThinkingLoader searchStatus={searchStatus} />
           </div>
         ) : isSavedCoderProject ? (
