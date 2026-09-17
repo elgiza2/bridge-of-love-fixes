@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { stripComputerMention } from "@/lib/computer/shouldUseComputer";
 import type { Message, ToolPart } from "../chatConstants";
 import { PENDING_COMPUTER_RUN } from "@/lib/computer/activeRun";
+import type { AttachedFile } from "../hooks/useAttachments";
 
 export interface RunComputerArgs {
   text: string;
@@ -17,14 +18,14 @@ export interface RunComputerArgs {
   attachments?: string[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   setInput: (v: string) => void;
-  setAttachedFiles: (v: any[]) => void;
+  setAttachedFiles: React.Dispatch<React.SetStateAction<AttachedFile[]>>;
   createOrUpdateConversation: (title: string) => Promise<string | null>;
   saveMessage: (
     cid: string,
     role: string,
     content: string,
-    modelId?: any,
-    meta?: any,
+    modelId?: unknown,
+    meta?: Record<string, unknown>,
   ) => Promise<string | undefined>;
   ownInsertedIdsRef: React.MutableRefObject<Set<string>>;
 }
@@ -42,6 +43,13 @@ export async function runComputerTurn({
   ownInsertedIdsRef,
 }: RunComputerArgs) {
   const prompt = stripComputerMention(text);
+  const computerPrompt = `${prompt || text}
+
+Execution guardrails:
+- For coding or website tasks, write files atomically with the available file tool, then read them back and validate the result.
+- Never retry a corrupted file-writing method more than twice. If the provider's writer mangles characters or a required file API is unavailable, stop the task with a clear failure instead of looping.
+- Prefer the workspace file tools over JavaScript string injection, base64 tricks, browser downloads, or unsupported File System Access APIs.
+- Do not claim completion unless the produced file is readable and valid.`;
   const assistantClientId = `assistant-${localTurnId}`;
 
   const computerTool: ToolPart = {
@@ -62,9 +70,7 @@ export async function runComputerTurn({
 
   // Flip the composer's send button into a stop button right away — the turn
   // is already in flight before the provider hands back a run id.
-  const { setActiveComputerRun, clearActiveComputerRun } = await import(
-    "@/lib/computer/activeRun"
-  );
+  const { setActiveComputerRun, clearActiveComputerRun } = await import("@/lib/computer/activeRun");
   setActiveComputerRun(PENDING_COMPUTER_RUN);
 
   try {
@@ -79,7 +85,7 @@ export async function runComputerTurn({
     // the real work begins.
     const { createComputerTask, computerErrorMessage } = await import("@/lib/computer/client");
     const taskPromise = createComputerTask({
-      prompt,
+      prompt: computerPrompt,
       conversation_id: cid,
       attachments,
     });
@@ -113,9 +119,7 @@ export async function runComputerTurn({
         plan = await generateRunPlan(prompt || text, cid);
         if (plan.length) {
           setMessages((prev) =>
-            prev.map((m) =>
-              m.clientId === assistantClientId ? { ...m, computerPlan: plan } : m,
-            ),
+            prev.map((m) => (m.clientId === assistantClientId ? { ...m, computerPlan: plan } : m)),
           );
         }
       } catch {
@@ -149,9 +153,9 @@ export async function runComputerTurn({
                 ...m,
                 id: assistantId || m.id,
                 content: intro,
-                 computerTaskId: task.task_id,
+                computerTaskId: task.task_id,
                 computerPlan: plan,
-                 toolParts: [{ ...computerTool, state: "done" }],
+                toolParts: [{ ...computerTool, state: "done" }],
               }
             : m,
         ),
@@ -163,11 +167,11 @@ export async function runComputerTurn({
       setMessages((prev) =>
         prev.map((m) =>
           m.clientId === assistantClientId
-             ? {
-                 ...m,
-                 content: intro ? `${intro}\n\n${msg}` : msg,
-                 toolParts: [{ ...computerTool, state: "error", result: msg }],
-               }
+            ? {
+                ...m,
+                content: intro ? `${intro}\n\n${msg}` : msg,
+                toolParts: [{ ...computerTool, state: "error", result: msg }],
+              }
             : m,
         ),
       );
