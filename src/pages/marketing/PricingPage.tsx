@@ -88,8 +88,9 @@ const PricingPage = () => {
   // number on screen is the number the payment page charges.
   const { entries: catalog } = useBillingCatalog();
   const [winbackOffer, setWinbackOffer] = useState(false);
-  // The $1 / 3-day trial runs through the local (Kashier) gateway, so it is
-  // only offered to Arab-region visitors.
+  // The $1 / 3-day trial runs through the local (Kashier) gateway. Eligibility
+  // is account/catalog based; geo only selects the default gateway for regular
+  // subscriptions and must not hide a valid trial.
   const [arabRegion, setArabRegion] = useState(() => isArabRegion());
   useEffect(() => {
     setWinbackOffer(hasAbandonedCheckout());
@@ -99,7 +100,7 @@ const PricingPage = () => {
     return () => window.removeEventListener("megsy:geo-country", onGeoCountry);
   }, []);
   const introTrialEligible = useIntroTrialEligible();
-  const trialEligible = arabRegion && introTrialEligible && trialAvailable(catalog);
+  const trialEligible = introTrialEligible && trialAvailable(catalog);
   const [sidebarCollapsed] = useSidebarCollapsed();
   const PLANS = brandText(RAW_PLANS);
   const FAQS = brandText(RAW_FAQS).slice(0, FAQ_LIMIT);

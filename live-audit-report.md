@@ -34,3 +34,7 @@ The supplied test account logged in successfully, and ordinary chat, Website/Cod
 ## Notes and limits
 
 The browser session did not provide a controllable mobile viewport in this run, so mobile-specific visual assertions were not treated as confirmed findings. The source repository’s TypeScript and production build checks were successful in the earlier audit; the live findings above require job/backend and billing-catalog validation rather than a simple TypeScript fix.
+
+## Post-deployment follow-up
+
+After the first production deployment, the live pricing page displayed **$5/month** while its FAQ still said **$7 first month**. The FAQ copy was changed to refer to the current introductory price dynamically rather than hard-coding the obsolete amount. The trial CTA was also changed to depend on account/catalog eligibility rather than the asynchronous visitor-region result; a trial request is explicitly routed to the local Kashier gateway.
