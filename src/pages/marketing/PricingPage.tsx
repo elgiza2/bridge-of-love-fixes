@@ -118,6 +118,7 @@ const PricingPage = () => {
         perYear: "/ سنة",
         popular: "الأكثر اختيارًا",
         trial: `جرّب ${TRIAL_DAYS} أيام بـ ${TRIAL_PRICE}$`,
+        checkoutNote: "المبلغ النهائي والعملة بيظهروا بوضوح في صفحة الدفع قبل التأكيد.",
         faq: "أسئلة شائعة",
         subscribed: "أنت بالفعل مشترك",
         upgrade: "ترقية الخطة",
@@ -135,6 +136,7 @@ const PricingPage = () => {
         perYear: "/ year",
         popular: "Most popular",
         trial: `Try ${TRIAL_DAYS} days for $${TRIAL_PRICE}`,
+        checkoutNote: "The final local-currency amount is shown by the payment provider before you confirm.",
         faq: "Questions",
         subscribed: "You are already subscribed",
         upgrade: "Upgrade plan",
@@ -454,6 +456,9 @@ const PricingPage = () => {
                         {isYearly ? t.perYear : t.perMonth}
                       </span>
                     </div>
+                    <p className="mt-2 text-[11.5px] leading-relaxed text-muted-foreground">
+                      {t.checkoutNote}
+                    </p>
                     {price.isIntro ? (
                       <p className="mt-1.5 text-[12.5px] text-muted-foreground">
                         {t.firstMonth} · ${plan.monthlyPrice} {t.perMonth}
