@@ -56,6 +56,10 @@ export default function ComposerServicePanel({
   const showTemplatePicker = isSlides && !!onOpenTemplatePicker;
   const template = isSlides ? findSlidesTemplate(slidesTemplate || "") : null;
   const label = SERVICE_LABELS[key];
+  const isArabicUi = typeof document !== "undefined" && document.documentElement.lang.startsWith("ar");
+  const localizedLabel = isArabicUi
+    ? ({ code: "موقع", dev: "برمجة", "deep-research": "بحث عميق", learning: "تعلّم", docs: "مستندات" } as Record<string, string>)[key]
+    : label;
 
   if (!showMediaPicker && !showTemplatePicker && !label) return null;
 
@@ -68,12 +72,12 @@ export default function ComposerServicePanel({
         <button
           type="button"
           onClick={() => setPickerOpen(true)}
-          aria-label={isVideo ? "Choose video model" : "Choose image model"}
+          aria-label={isArabicUi ? (isVideo ? "اختار موديل الفيديو" : "اختار موديل الصور") : isVideo ? "Choose video model" : "Choose image model"}
           aria-haspopup="dialog"
           className={pickerButtonClass}
         >
           <span className="min-w-0 flex-1 truncate">
-            {mediaModel?.name || (isVideo ? "Video model" : "Image model")}
+            {mediaModel?.name || (isArabicUi ? (isVideo ? "موديل فيديو" : "موديل صور") : isVideo ? "Video model" : "Image model")}
           </span>
           <ChevronDown className="w-3.5 h-3.5 shrink-0 text-foreground/40" strokeWidth={2.4} />
         </button>
@@ -83,23 +87,23 @@ export default function ComposerServicePanel({
         <button
           type="button"
           onClick={() => onOpenTemplatePicker()}
-          aria-label="Choose slides template"
+          aria-label={isArabicUi ? "اختار قالب العرض" : "Choose slides template"}
           aria-haspopup="dialog"
           className={pickerButtonClass}
         >
-          <span className="min-w-0 flex-1 truncate">{template?.name || "Template"}</span>
+          <span className="min-w-0 flex-1 truncate">{template?.name || (isArabicUi ? "قالب العرض" : "Template")}</span>
           <ChevronDown className="w-3.5 h-3.5 shrink-0 text-foreground/40" strokeWidth={2.4} />
         </button>
       ) : null}
 
-      {!showMediaPicker && !showTemplatePicker && label ? (
-        <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-foreground">{label}</span>
+      {!showMediaPicker && !showTemplatePicker && localizedLabel ? (
+        <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-foreground">{localizedLabel}</span>
       ) : null}
 
       <button
         type="button"
         onClick={onClear}
-        aria-label={label ? `Close ${label}` : "Close mode"}
+        aria-label={localizedLabel ? (isArabicUi ? `اقفل ${localizedLabel}` : `Close ${localizedLabel}`) : isArabicUi ? "اقفل الوضع" : "Close mode"}
         className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-foreground/45 transition-colors hover:bg-foreground/[0.08] hover:text-foreground"
       >
         <X className="w-3.5 h-3.5" strokeWidth={2.2} />
