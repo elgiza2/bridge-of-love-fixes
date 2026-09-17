@@ -6,6 +6,7 @@ interface MobileSidebarButtonProps {
   className?: string;
   ariaLabel?: string;
   testId?: string;
+  side?: "left" | "right";
   /**
    * Anchor the button to the inline-start edge of the viewport (same spot the
    * chat header uses) instead of letting it flow inside a centered container.
@@ -21,6 +22,7 @@ export function MobileSidebarButton({
   className,
   ariaLabel = "Open menu",
   testId,
+  side = "left",
   edge = false,
 }: MobileSidebarButtonProps) {
   return (
@@ -34,7 +36,7 @@ export function MobileSidebarButton({
       className={cn(
         "md:hidden h-11 w-11 rounded-full bg-transparent text-foreground shadow-none hover:bg-transparent",
         edge &&
-          "fixed left-3 right-auto z-30 top-[calc(var(--promo-banner-h,0px)+max(env(safe-area-inset-top),0.25rem)+0.375rem)]",
+          `fixed z-30 top-[calc(var(--promo-banner-h,0px)+max(env(safe-area-inset-top),0.25rem)+0.375rem)] ${side === "right" ? "right-3 left-auto" : "left-3 right-auto"}`,
         className,
       )}
     >

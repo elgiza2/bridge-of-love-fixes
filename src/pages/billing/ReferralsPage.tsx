@@ -256,6 +256,7 @@ const ReferralsPage = () => {
   const { pathname } = useLocation();
   const onRewards = pathname.endsWith("/rewards");
   const lang = useUserLang();
+  const isRtlUi = lang === "ar" || lang === "ar-eg" || lang === "he" || lang === "fa";
   const milestone = useReferralMilestone();
   const [userId, setUserId] = useState<string | null>(null);
   const [code, setCode] = useState("");
@@ -460,7 +461,13 @@ const ReferralsPage = () => {
           className="fixed inset-x-0 z-30 flex min-h-[44px] items-center bg-background px-3 py-1.5 pt-[max(env(safe-area-inset-top),0.25rem)]"
           style={{ top: "var(--promo-banner-h, 0px)" }}
         >
-          <MobileSidebarButton edge onClick={() => setSidebarOpen(true)} />
+          {!sidebarOpen && (
+            <MobileSidebarButton
+              edge
+              side={isRtlUi ? "right" : "left"}
+              onClick={() => setSidebarOpen(true)}
+            />
+          )}
         </div>
       )}
 
@@ -489,7 +496,7 @@ const ReferralsPage = () => {
         <MobilePushShell
           open={sidebarOpen}
           onOpenChange={setSidebarOpen}
-          mobileSide="left"
+          mobileSide={isRtlUi ? "right" : "left"}
           onNewChat={() => navigate("/")}
           currentMode="chat"
         >
