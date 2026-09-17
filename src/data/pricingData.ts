@@ -91,7 +91,6 @@ const MAX_FEATURES = [
   "24/7 priority support · cancel anytime",
 ];
 
-
 /** Yearly = 8 × monthly, i.e. 4 months free. */
 export const YEARLY_FREE_MONTHS = 4;
 
@@ -175,7 +174,6 @@ export const SAVE_OFFER = {
 /** Half-price amount for the save offer, per plan tier. */
 export const saveOfferPrice = (monthlyPrice: number) =>
   Math.round((monthlyPrice * (100 - SAVE_OFFER.discountPercent)) / 100);
-
 
 export const getPlan = (tier: PlanTier) => PLANS.find((p) => p.tier === tier);
 
@@ -275,8 +273,7 @@ export const SERVICES_GUIDE: { name: string; desc: string }[] = [
   },
   {
     name: "Megsy Credits (MC)",
-    desc: "Image generation is unlimited. MC is spent on premium video and premium model runs only, and refreshes at the start of each billing cycle."
-      ,
+    desc: "Image generation is unlimited. MC is spent on premium video and premium model runs only, and refreshes at the start of each billing cycle.",
   },
   {
     name: "Team Workspace",
@@ -311,11 +308,11 @@ export const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Do you offer refunds?",
-    a: "Yes — new paid subscriptions include a 7-day no-questions-asked refund window, provided no more than 10% of your included credits have been consumed. Credit packs are non-refundable once any credit has been spent. Failed generations are auto-refunded within minutes. Email support@megsyai.com (subject: \"Refund Request\") and we respond within 5 business days.",
+    a: 'Yes — new paid subscriptions include a 7-day no-questions-asked refund window, provided no more than 10% of your included credits have been consumed. Credit packs are non-refundable once any credit has been spent. Failed generations are auto-refunded within minutes. Email support@megsyai.com (subject: "Refund Request") and we respond within 5 business days.',
   },
   {
     q: "Is my payment secure? Which payment methods do you accept?",
-    a: "All payments are processed by Dodo Payments, a PCI-DSS Level 1 merchant of record. Your card details never touch our servers. We accept Visa, Mastercard, American Express, JCB, UnionPay, Apple Pay, Google Pay, Amazon Pay and WeChat Pay, with 3-D Secure 2 on eligible transactions. Your statement will show \"DODO * MEGSY AI\".",
+    a: 'All payments are processed by Dodo Payments, a PCI-DSS Level 1 merchant of record. Your card details never touch our servers. We accept Visa, Mastercard, American Express, JCB, UnionPay, Apple Pay, Google Pay, Amazon Pay and WeChat Pay, with 3-D Secure 2 on eligible transactions. Your statement will show "DODO * MEGSY AI".',
   },
   {
     q: "Do you offer team or enterprise plans?",
