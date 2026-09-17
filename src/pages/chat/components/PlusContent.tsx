@@ -1,7 +1,6 @@
 import { memo, useEffect, useMemo, useState } from "react";
 import { m as motion, AnimatePresence } from "framer-motion";
 import {
-  Globe,
   Music2,
   ChevronLeft,
   Check,
@@ -16,8 +15,6 @@ import {
 } from "lucide-react";
 
 import { toast } from "sonner";
-import { useWebSearchMode, WEB_SEARCH_MODES } from "@/lib/webSearchMode";
-
 import { promptUpgrade } from "@/lib/upgradeMoment";
 import { supabase } from "@/integrations/supabase/client";
 import type { Integration } from "@/lib/integrationsData";
@@ -101,21 +98,6 @@ const mobileFont =
 const PlusMain = (p: PlusContentProps) => {
   const language = useUserLang();
   const isArabic = language === "ar-eg";
-  const [searchMode, setSearchMode] = useWebSearchMode();
-  const [searchOpen, setSearchOpen] = useState(false);
-  const searchLabel =
-    searchMode === "on"
-      ? isArabic
-        ? "مفتوح"
-        : "On"
-      : searchMode === "off"
-        ? isArabic
-          ? "مقفول"
-          : "Off"
-        : isArabic
-          ? "تلقائي"
-          : "Auto";
-
   const closeThen = (fn: () => void) => () => {
     p.setPlusMenuOpen(false);
     fn();
@@ -131,14 +113,6 @@ const PlusMain = (p: PlusContentProps) => {
   };
 
   const items: MenuItem[] = [
-    {
-      id: "search",
-      label: isArabic ? "البحث في الويب" : "Web search",
-      Icon: Globe,
-      value: searchLabel,
-      expanded: searchOpen,
-      onClick: () => setSearchOpen((v) => !v),
-    },
     {
       id: "skills",
       label: isArabic ? "المهارات" : "Skills",
@@ -219,9 +193,6 @@ const PlusMain = (p: PlusContentProps) => {
                 />
               )}
             </button>
-            <AnimatePresence initial={false}>
-              {item.id === "search" && searchOpen ? <SearchModeList compact /> : null}
-            </AnimatePresence>
           </div>
         ))}
         </div>
@@ -229,43 +200,6 @@ const PlusMain = (p: PlusContentProps) => {
     </motion.div>
   );
 
-  function SearchModeList({ compact }: { compact?: boolean }) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: "auto" }}
-        exit={{ opacity: 0, height: 0 }}
-        transition={{ duration: 0.18, ease: [0.32, 0.72, 0, 1] }}
-        className="overflow-hidden"
-      >
-        <div className="mx-2.5 my-1 flex flex-col gap-0.5">
-          {WEB_SEARCH_MODES.map((opt) => {
-            const selected = searchMode === opt.id;
-            return (
-              <button
-                key={opt.id}
-                type="button"
-                onClick={() => setSearchMode(opt.id)}
-                className="flex w-full items-center gap-2.5 rounded-[10px] px-2.5 py-2 text-start transition-colors hover:bg-foreground/[0.055]"
-              >
-                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="text-[13.5px] leading-none text-foreground">{opt.label}</span>
-                  {!compact && (
-                    <span className="truncate text-[11px] leading-tight text-muted-foreground">
-                      {opt.desc}
-                    </span>
-                  )}
-                </span>
-                {selected && (
-                  <Check className="h-[15px] w-[15px] shrink-0 text-primary" strokeWidth={2.4} />
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </motion.div>
-    );
-  }
 };
 
 const PlusModels = (p: PlusContentProps) => (

@@ -439,8 +439,9 @@ function writeCachedModels(models: ModelDetail[]) {
 export function useDynamicModels() {
   const initial = typeof window !== "undefined" ? readCachedModels() : null;
   const [models, setModels] = useState<ModelDetail[]>(initial ?? ALL_MODEL_DETAILS);
-  // If we have a cached snapshot, treat as loaded immediately and revalidate in the background.
-  const [loading, setLoading] = useState(!initial);
+  // The bundled catalog is usable immediately; refresh remote metadata in the background.
+  // This keeps the picker interactive even when a Supabase model query is slow or unavailable.
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
