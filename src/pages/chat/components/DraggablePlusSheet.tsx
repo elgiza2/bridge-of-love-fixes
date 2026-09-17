@@ -277,7 +277,7 @@ export const DraggablePlusSheet = ({
             {sheetKind === "integrations" ? <Plug className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
           </span>
           <span className="min-w-0 flex-1 text-[14px] font-semibold text-foreground">
-            {sheetKind === "integrations" ? "Integrations & tools" : "Megsy tools"}
+            {sheetKind === "integrations" ? "Integrations & tools" : "Add to chat"}
           </span>
           <button
             type="button"

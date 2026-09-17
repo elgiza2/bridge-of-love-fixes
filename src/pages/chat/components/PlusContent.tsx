@@ -11,8 +11,9 @@ import {
   Trash2,
   Plug,
   Images,
-  Paperclip,
   Blocks,
+  Camera,
+  FileUp,
 } from "lucide-react";
 
 import { toast } from "sonner";
@@ -160,46 +161,44 @@ const PlusMain = (p: PlusContentProps) => {
         className="flex flex-col gap-2 px-1 py-2"
         style={{ fontFamily: mobileFont }}
       >
-        <div className="rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.14] via-primary/[0.06] to-transparent px-3.5 py-3">
-          <div className="flex items-center gap-2">
-            <span className="grid h-8 w-8 place-items-center rounded-xl bg-primary/15 text-primary">
-              <Plus className="h-4 w-4" strokeWidth={2.4} />
-            </span>
-            <div className="min-w-0">
-              <p className="text-[13.5px] font-semibold text-foreground">
-                {isArabic ? "أضف قدرة للمحادثة" : "Add a capability"}
-              </p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">
-                {isArabic ? "ملفات، صور، بحث وتطبيقات في مكان واحد" : "Files, images, search and apps in one place"}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-2 px-0">
+        <div className="grid grid-cols-3 gap-2 px-0">
           <button
             data-no-neo
             type="button"
-            onClick={closeThen(() => p.imageInputRef.current?.click())}
-            className="group flex h-[52px] items-center gap-2.5 rounded-2xl border border-foreground/[0.09] bg-foreground/[0.045] px-3 text-start shadow-sm transition-[background-color,transform,border-color] duration-150 hover:border-primary/30 hover:bg-primary/[0.08] active:scale-[0.98]"
+            onClick={closeThen(() => p.fileInputRef.current?.click())}
+            className="group flex h-[102px] flex-col items-center justify-center gap-2 rounded-2xl border border-foreground/[0.08] bg-background px-2 text-center shadow-sm transition-[background-color,transform,border-color] duration-150 hover:border-primary/30 hover:bg-foreground/[0.03] active:scale-[0.98]"
           >
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] bg-primary/12 text-primary">
-              <Images className="h-[16px] w-[16px]" strokeWidth={1.9} />
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
+              <FileUp className="h-[21px] w-[21px]" strokeWidth={1.8} />
             </span>
             <span className="text-[13px] font-medium text-foreground">
-              {isArabic ? "الصور" : "Images"}
+              {isArabic ? "ملفات" : "Files"}
             </span>
           </button>
           <button
             data-no-neo
             type="button"
-            onClick={closeThen(() => p.fileInputRef.current?.click())}
-            className="group flex h-[52px] items-center gap-2.5 rounded-2xl border border-foreground/[0.09] bg-foreground/[0.045] px-3 text-start shadow-sm transition-[background-color,transform,border-color] duration-150 hover:border-primary/30 hover:bg-primary/[0.08] active:scale-[0.98]"
+            onClick={closeThen(() => p.imageInputRef.current?.click())}
+            className="group flex h-[102px] flex-col items-center justify-center gap-2 rounded-2xl border border-foreground/[0.08] bg-background px-2 text-center shadow-sm transition-[background-color,transform,border-color] duration-150 hover:border-primary/30 hover:bg-foreground/[0.03] active:scale-[0.98]"
           >
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] bg-foreground/[0.08] text-foreground/80">
-              <Paperclip className="h-[16px] w-[16px]" strokeWidth={1.9} />
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
+              <Images className="h-[21px] w-[21px]" strokeWidth={1.8} />
             </span>
             <span className="text-[13px] font-medium text-foreground">
-              {isArabic ? "الملفات" : "Files"}
+              {isArabic ? "الصور" : "Photos"}
+            </span>
+          </button>
+          <button
+            data-no-neo
+            type="button"
+            onClick={closeThen(() => p.cameraInputRef.current?.click())}
+            className="group flex h-[102px] flex-col items-center justify-center gap-2 rounded-2xl border border-foreground/[0.08] bg-background px-2 text-center shadow-sm transition-[background-color,transform,border-color] duration-150 hover:border-primary/30 hover:bg-foreground/[0.03] active:scale-[0.98]"
+          >
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
+              <Camera className="h-[21px] w-[21px]" strokeWidth={1.8} />
+            </span>
+            <span className="text-[13px] font-medium text-foreground">
+              {isArabic ? "الكاميرا" : "Camera"}
             </span>
           </button>
         </div>
