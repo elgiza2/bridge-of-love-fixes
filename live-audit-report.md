@@ -38,3 +38,7 @@ The browser session did not provide a controllable mobile viewport in this run, 
 ## Post-deployment follow-up
 
 After the first production deployment, the live pricing page displayed **$5/month** while its FAQ still said **$7 first month**. The FAQ copy was changed to refer to the current introductory price dynamically rather than hard-coding the obsolete amount. The trial CTA was also changed to depend on account/catalog eligibility rather than the asynchronous visitor-region result; a trial request is explicitly routed to the local Kashier gateway.
+
+## Final verification
+
+The final production page displayed **Try 3 days for $1** for the eligible test account. Clicking the trial CTA created a local Kashier checkout and opened it without submitting payment. The generated checkout contained `amount=49`, `currency=EGP`, `trial_days=3` in the order metadata path, and the local Kashier gateway URL. No card details were entered and no payment was completed.
