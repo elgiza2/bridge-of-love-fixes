@@ -317,7 +317,7 @@
   [data-skin="claude"] [data-plus-menu] {
     margin-left: 0.5rem !important;
     width: min(360px, calc(100vw - 24px)) !important;
-    max-height: min(78vh, 680px) !important;
+    max-height: min(64vh, 520px) !important;
     color: #ECECEC !important;
     border-radius: 16px !important;
     padding: 0.35rem !important;

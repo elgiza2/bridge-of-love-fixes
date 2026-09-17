@@ -34,7 +34,7 @@ export function MobileSidebarButton({
       className={cn(
         "md:hidden h-11 w-11 rounded-full bg-transparent text-foreground shadow-none hover:bg-transparent",
         edge &&
-          "fixed z-30 start-3 top-[calc(var(--promo-banner-h,0px)+max(env(safe-area-inset-top),0.25rem)+0.375rem)]",
+          "fixed left-3 right-auto z-30 top-[calc(var(--promo-banner-h,0px)+max(env(safe-area-inset-top),0.25rem)+0.375rem)]",
         className,
       )}
     >

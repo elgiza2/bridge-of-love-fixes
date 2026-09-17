@@ -160,25 +160,17 @@ const PlusMain = (p: PlusContentProps) => {
         className="flex flex-col gap-1 px-1 py-1"
         style={{ fontFamily: mobileFont }}
       >
-        <div className="px-2.5 pb-2 pt-1">
-          <p className="text-[13px] font-semibold text-foreground">
-            {isArabic ? "أدوات سريعة" : "Quick tools"}
-          </p>
-          <p className="mt-0.5 text-[11.5px] text-muted-foreground">
-            {isArabic ? "أضف ملفات أو فعّل أدوات المحادثة" : "Add files or turn on chat tools"}
-          </p>
-        </div>
-        <div className="grid grid-cols-2 gap-2 px-1 pb-2">
+        <div className="grid grid-cols-2 gap-1 px-0 pb-1">
           <button
             data-no-neo
             type="button"
             onClick={closeThen(() => p.imageInputRef.current?.click())}
-            className="group flex min-h-[92px] flex-col items-start justify-between rounded-[16px] border border-foreground/[0.08] bg-foreground/[0.04] p-3 text-start transition-[background-color,transform,border-color] duration-150 hover:border-primary/30 hover:bg-primary/[0.08] active:scale-[0.98]"
+            className="group flex h-11 items-center gap-2 rounded-[10px] border border-foreground/[0.08] bg-foreground/[0.04] px-2.5 text-start transition-[background-color,transform,border-color] duration-150 hover:border-primary/30 hover:bg-primary/[0.08] active:scale-[0.98]"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-primary/12 text-primary">
-              <Images className="h-[18px] w-[18px]" strokeWidth={1.9} />
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] bg-primary/12 text-primary">
+              <Images className="h-[16px] w-[16px]" strokeWidth={1.9} />
             </span>
-            <span className="text-[13px] font-semibold text-foreground">
+            <span className="text-[13px] font-medium text-foreground">
               {isArabic ? "الصور" : "Images"}
             </span>
           </button>
@@ -186,12 +178,12 @@ const PlusMain = (p: PlusContentProps) => {
             data-no-neo
             type="button"
             onClick={closeThen(() => p.fileInputRef.current?.click())}
-            className="group flex min-h-[92px] flex-col items-start justify-between rounded-[16px] border border-foreground/[0.08] bg-foreground/[0.04] p-3 text-start transition-[background-color,transform,border-color] duration-150 hover:border-primary/30 hover:bg-primary/[0.08] active:scale-[0.98]"
+            className="group flex h-11 items-center gap-2 rounded-[10px] border border-foreground/[0.08] bg-foreground/[0.04] px-2.5 text-start transition-[background-color,transform,border-color] duration-150 hover:border-primary/30 hover:bg-primary/[0.08] active:scale-[0.98]"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-foreground/[0.08] text-foreground/80">
-              <Paperclip className="h-[18px] w-[18px]" strokeWidth={1.9} />
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] bg-foreground/[0.08] text-foreground/80">
+              <Paperclip className="h-[16px] w-[16px]" strokeWidth={1.9} />
             </span>
-            <span className="text-[13px] font-semibold text-foreground">
+            <span className="text-[13px] font-medium text-foreground">
               {isArabic ? "الملفات" : "Files"}
             </span>
           </button>
@@ -199,19 +191,19 @@ const PlusMain = (p: PlusContentProps) => {
         {items.map((item) => (
           <div
             key={item.id}
-            className="flex flex-col rounded-[14px] border border-foreground/[0.06] bg-foreground/[0.025]"
+            className="flex flex-col rounded-[10px] border border-foreground/[0.06] bg-foreground/[0.025]"
           >
             <button
               data-no-neo
               type="button"
               onClick={item.onClick}
-              className="plus-row flex h-12 w-full items-center gap-3 rounded-[14px] border-0 bg-transparent px-3 text-start transition-[background-color,transform] duration-150 hover:bg-foreground/[0.055] active:scale-[0.99] active:bg-foreground/[0.09]"
+              className="plus-row flex h-10 w-full items-center gap-2.5 rounded-[10px] border-0 bg-transparent px-2.5 text-start transition-[background-color,transform] duration-150 hover:bg-foreground/[0.055] active:scale-[0.99] active:bg-foreground/[0.09]"
             >
               <item.Icon
-                className="h-[19px] w-[19px] shrink-0 text-foreground/80"
+                className="h-[17px] w-[17px] shrink-0 text-foreground/80"
                 strokeWidth={1.8}
               />
-              <span className="min-w-0 flex-1 truncate text-[15px] font-normal text-foreground">
+              <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-foreground">
                 {item.label}
               </span>
               {item.value && (
@@ -285,7 +277,7 @@ const PlusModels = (p: PlusContentProps) => (
       >
         <ChevronLeft className="w-4 h-4 text-foreground/80" />
       </motion.button>
-      <span className="text-[13px] font-semibold text-foreground/85">Choose Model</span>
+      <span className="text-[13px] font-medium text-foreground/85">Choose Model</span>
     </div>
     <div className="flex flex-col gap-1">
       {[
@@ -476,7 +468,7 @@ const PlusMusic = (p: PlusContentProps) => (
       >
         <ChevronLeft className="w-4 h-4 text-foreground/80" />
       </motion.button>
-      <span className="text-[13px] font-semibold text-foreground/85">Study music</span>
+      <span className="text-[13px] font-medium text-foreground/85">Study music</span>
     </div>
     <div className="flex flex-col gap-1">
       {[
@@ -616,7 +608,7 @@ const PlusTimer = (p: PlusContentProps) => (
       >
         <ChevronLeft className="w-4 h-4 text-foreground/80" />
       </motion.button>
-      <span className="text-[13px] font-semibold text-foreground/85">Focus timer</span>
+      <span className="text-[13px] font-medium text-foreground/85">Focus timer</span>
     </div>
     <div className="px-2 pb-1">
       <div className="grid grid-cols-4 gap-1.5 mb-2">

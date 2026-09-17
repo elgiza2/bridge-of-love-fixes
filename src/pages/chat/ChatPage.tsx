@@ -2664,7 +2664,7 @@ const ChatPage = () => {
       // Open the tools panel as a proper full-height drawer. The previous
       // compact snap point hid the photo/file cards behind the composer and
       // made the menu look broken on short screens.
-      const expandedH = Math.max(360, Math.min(vh * 0.9, vh - 24));
+      const expandedH = Math.min(340, vh - 24);
       const collapsedY = 0;
 
       return createPortal(
@@ -2688,7 +2688,7 @@ const ChatPage = () => {
     const left = r ? Math.max(12, Math.min(window.innerWidth - menuWidth - 12, r.left + 8)) : 24;
     const bottom = r ? window.innerHeight - r.top + 8 : 96;
     const availableAbove = r ? Math.max(260, r.top - 16) : 600;
-    const maxMenuHeight = Math.min(680, Math.max(360, availableAbove));
+    const maxMenuHeight = Math.min(520, Math.max(300, availableAbove));
     return createPortal(
       <>
         {/* Desktop: backdrop to close on outside click */}

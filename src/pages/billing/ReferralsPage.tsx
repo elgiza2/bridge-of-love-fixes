@@ -460,7 +460,7 @@ const ReferralsPage = () => {
           className="fixed inset-x-0 z-30 flex min-h-[44px] items-center bg-background px-3 py-1.5 pt-[max(env(safe-area-inset-top),0.25rem)]"
           style={{ top: "var(--promo-banner-h, 0px)" }}
         >
-          <MobileSidebarButton onClick={() => setSidebarOpen(true)} />
+          <MobileSidebarButton edge onClick={() => setSidebarOpen(true)} />
         </div>
       )}
 
@@ -489,6 +489,7 @@ const ReferralsPage = () => {
         <MobilePushShell
           open={sidebarOpen}
           onOpenChange={setSidebarOpen}
+          mobileSide="left"
           onNewChat={() => navigate("/")}
           currentMode="chat"
         >

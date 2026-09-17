@@ -17,6 +17,8 @@ interface Props {
   onSelectConversation?: (id: string) => void;
   activeConversationId?: string | null;
   currentMode?: string;
+  /** Override the drawer side for pages whose mobile layout is intentionally stable. */
+  mobileSide?: "left" | "right";
   children: ReactNode;
 }
 
@@ -36,11 +38,12 @@ export default function MobilePushShell({
   onSelectConversation,
   activeConversationId,
   currentMode = "chat",
+  mobileSide,
   children,
 }: Props) {
   const [revealX, setRevealX] = useState(0);
   const lang = useUserLang();
-  const isRtlUi = RTL_UI_LANGS.has(lang);
+  const isRtlUi = mobileSide ? mobileSide === "right" : RTL_UI_LANGS.has(lang);
   const pushX = isRtlUi ? -revealX : revealX;
   const shellX = useMotionValue(0);
   const progress = useTransform(shellX, (latest) =>
