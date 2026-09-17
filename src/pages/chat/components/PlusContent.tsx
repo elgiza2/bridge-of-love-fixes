@@ -12,7 +12,6 @@ import {
   Plug,
   Images,
   Blocks,
-  Camera,
   FileUp,
 } from "lucide-react";
 
@@ -161,7 +160,7 @@ const PlusMain = (p: PlusContentProps) => {
         className="flex flex-col gap-2 px-1 py-2"
         style={{ fontFamily: mobileFont }}
       >
-        <div className="grid grid-cols-3 gap-2 px-0">
+        <div className="grid grid-cols-2 gap-2 px-0">
           <button
             data-no-neo
             type="button"
@@ -188,25 +187,12 @@ const PlusMain = (p: PlusContentProps) => {
               {isArabic ? "الصور" : "Photos"}
             </span>
           </button>
-          <button
-            data-no-neo
-            type="button"
-            onClick={closeThen(() => p.cameraInputRef.current?.click())}
-            className="group flex h-[102px] flex-col items-center justify-center gap-2 rounded-2xl border border-foreground/[0.08] bg-background px-2 text-center shadow-sm transition-[background-color,transform,border-color] duration-150 hover:border-primary/30 hover:bg-foreground/[0.03] active:scale-[0.98]"
-          >
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
-              <Camera className="h-[21px] w-[21px]" strokeWidth={1.8} />
-            </span>
-            <span className="text-[13px] font-medium text-foreground">
-              {isArabic ? "الكاميرا" : "Camera"}
-            </span>
-          </button>
         </div>
-        <div className="overflow-hidden rounded-2xl border border-foreground/[0.08] bg-foreground/[0.025] shadow-sm">
+        <div className="overflow-hidden rounded-2xl bg-transparent">
         {items.map((item) => (
           <div
             key={item.id}
-            className="flex flex-col border-b border-foreground/[0.07] last:border-b-0"
+            className="flex flex-col border-b border-foreground/[0.08] last:border-b-0"
           >
             <button
               data-no-neo
