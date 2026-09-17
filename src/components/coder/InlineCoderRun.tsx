@@ -1,7 +1,18 @@
 /** @doc Megsy Coder inline run — renders as a normal chat turn: thinking trace,
  *  short message, then a site preview card and a project files card (ZIP). */
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Loader2, FileCode, ExternalLink, Eye, Download } from "lucide-react";
+import {
+  Loader2,
+  FileCode,
+  ExternalLink,
+  Eye,
+  Download,
+  CheckCircle2,
+  Circle,
+  Folder,
+  File,
+  ChevronRight,
+} from "lucide-react";
 
 import { runKimiCoder, type KimiEvent, type KimiFile, type KimiTodo } from "@/lib/kimiCoder";
 import { Button } from "@/components/ui/button";
@@ -319,7 +330,6 @@ export default function InlineCoderRun({
       .catch(() => undefined);
   };
 
-
   /** Regenerate a single asset and re-inject it across the project. */
   const regenerateAsset = async (id: string) => {
     const target = assetsRef.current.find((a) => a.id === id);
@@ -432,7 +442,6 @@ export default function InlineCoderRun({
   useEffect(() => {
     lastEventRef.current = Date.now();
     sawEventRef.current = false;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runId]);
 
   useEffect(() => {
@@ -559,6 +568,17 @@ export default function InlineCoderRun({
 
   const doneCount = todos.filter((t) => t.done).length;
   const fileList = useMemo(() => Array.from(files.keys()).sort(), [files]);
+  const fileGroups = useMemo(() => {
+    const groups = new Map<string, string[]>();
+    for (const path of fileList) {
+      const parts = path.split("/");
+      const folder = parts.length > 1 ? parts.slice(0, -1).join("/") : ".";
+      const list = groups.get(folder) ?? [];
+      list.push(parts.at(-1) || path);
+      groups.set(folder, list);
+    }
+    return Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b));
+  }, [fileList]);
   const runningLabel =
     todos.length > 0
       ? `Building… ${doneCount}/${todos.length} · ${files.size} files`
@@ -622,8 +642,8 @@ export default function InlineCoderRun({
         toast.success("Published", { description: url });
       }
       window.open(url, "_blank", "noopener,noreferrer");
-    } catch (e: any) {
-      const msg = e?.message || "Publish failed";
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Publish failed";
       if (/sign in/i.test(msg)) {
         toast.error("Sign in to publish", {
           description: "Publishing saves your project so anyone with the link can view it.",
@@ -682,7 +702,6 @@ export default function InlineCoderRun({
   const prose = useMemo(() => stripCode(notes).slice(0, 1200), [notes]);
   const traceText = useMemo(() => stripCode(notes), [notes]);
 
-
   const previewHtml = useMemo(() => {
     if (status !== "done" || projectFiles.length === 0) return "";
     try {
@@ -709,6 +728,39 @@ export default function InlineCoderRun({
       />
 
       {prose && <ChatMessage role="assistant" content={prose} />}
+      {todos.length > 0 && (
+        <section className="my-2 max-w-[640px] overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm">
+          <div className="flex items-center gap-2 border-b border-border/50 px-3 py-2.5">
+            <span className="grid h-7 w-7 place-items-center rounded-xl bg-primary/10 text-primary">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+            </span>
+            <span className="flex-1 text-[12.5px] font-medium text-foreground">
+              {ar
+                ? `المهام · ${doneCount}/${todos.length}`
+                : `Tasks · ${doneCount}/${todos.length}`}
+            </span>
+            {status === "running" ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+            ) : null}
+          </div>
+          <ul className="space-y-1 px-3 py-2.5">
+            {todos.map((todo) => (
+              <li key={todo.id} className="flex items-start gap-2 text-[12.5px] leading-relaxed">
+                {todo.done ? (
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                ) : (
+                  <Circle className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/60" />
+                )}
+                <span
+                  className={todo.done ? "text-muted-foreground line-through" : "text-foreground"}
+                >
+                  {todo.title}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {status === "error" && (
         <div className="my-2 max-w-[640px] rounded-2xl border border-destructive/30 bg-destructive/5 p-3 text-[12.5px] leading-relaxed text-destructive">
@@ -805,17 +857,33 @@ export default function InlineCoderRun({
                 ZIP
               </Button>
             </div>
-            <ul className="max-h-56 divide-y divide-border/40 overflow-y-auto">
-              {fileList.map((path) => (
-                <li
-                  key={path}
-                  className="truncate px-3 py-1.5 font-mono text-[11.5px] text-muted-foreground"
-                  dir="ltr"
-                >
-                  {path}
-                </li>
+            <div className="max-h-56 overflow-y-auto px-2 py-1.5" dir="ltr">
+              {fileGroups.map(([folder, names]) => (
+                <details key={folder} open className="group">
+                  <summary className="flex cursor-pointer list-none items-center gap-1.5 rounded-lg px-2 py-1.5 text-[11.5px] font-medium text-foreground/80 hover:bg-muted/60 [&::-webkit-details-marker]:hidden">
+                    <ChevronRight className="h-3.5 w-3.5 transition-transform group-open:rotate-90" />
+                    <Folder className="h-3.5 w-3.5 text-primary/80" />
+                    <span>{folder === "." ? (ar ? "الجذر" : "root") : folder}</span>
+                  </summary>
+                  <ul className="ms-6 border-s border-border/50 pb-1 ps-2">
+                    {names.map((name) => (
+                      <li key={`${folder}/${name}`}>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setSelectedFile(folder === "." ? name : `${folder}/${name}`)
+                          }
+                          className="flex w-full items-center gap-1.5 truncate rounded-md px-2 py-1 text-left font-mono text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                        >
+                          <File className="h-3 w-3 shrink-0" />
+                          <span className="truncate">{name}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
               ))}
-            </ul>
+            </div>
           </div>
         </div>
       )}
