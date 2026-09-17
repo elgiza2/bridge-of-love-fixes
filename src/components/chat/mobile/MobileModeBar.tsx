@@ -124,9 +124,14 @@ export default function MobileModeBar({ mode, onChange }: Props) {
               exit={{ opacity: 0, scale: 0.9, y: 4 }}
               transition={{ ...TAP_SPRING, delay: i * 0.02 }}
               style={{ scrollSnapAlign: "start" }}
-              className="shrink-0 inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full bg-foreground/[0.05] text-[13.5px] font-medium text-foreground/80 transition-colors hover:bg-foreground/[0.09] active:bg-foreground/[0.12]"
+              className="group shrink-0 inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border border-border/50 bg-gradient-to-r from-foreground/[0.045] via-primary/[0.045] to-foreground/[0.045] text-[13.5px] font-medium text-foreground/80 shadow-[0_2px_10px_-6px_hsl(var(--foreground)/0.45)] transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:bg-primary/[0.09] hover:text-foreground hover:shadow-[0_6px_16px_-8px_hsl(var(--primary)/0.65)] active:translate-y-0 active:bg-foreground/[0.12]"
             >
-              <Icon size={16} strokeWidth={2.2} style={{ color }} />
+              <Icon
+                size={16}
+                strokeWidth={2.2}
+                style={{ color }}
+                className="transition-transform duration-200 group-hover:scale-110"
+              />
               <span className="leading-none whitespace-nowrap">{tx(label)}</span>
             </motion.button>
           ))

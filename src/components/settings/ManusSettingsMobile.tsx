@@ -41,6 +41,7 @@ type Row = {
   onClick?: () => void;
   external?: boolean;
   chevron?: "arrow" | "stepper" | "none";
+  control?: "switch";
   danger?: boolean;
 };
 
@@ -68,7 +69,9 @@ const ManusSettingsMobile = () => {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user || cancelled) return;
       setUserEmail(user.email || "");
     })();
@@ -102,14 +105,12 @@ const ManusSettingsMobile = () => {
     { icon: Bell, label: "Notifications", path: "/notifications" },
     { icon: Database, label: "Data controls", path: "/settings/data" },
     { icon: PanelBottom, label: "Cloud browser", path: "/settings/cloud-browser" },
-    
+
     { icon: Puzzle, label: "Skills", path: "/settings/skills" },
     { icon: Plug, label: "Integrations", path: "/chat?integrations=1" },
   ];
 
-  const advancedRows: Row[] = [
-    { icon: Gift, label: "Referrals", path: "/referrals" },
-  ];
+  const advancedRows: Row[] = [{ icon: Gift, label: "Referrals", path: "/referrals" }];
 
   const accountRows: Row[] = [
     { icon: UserRound, label: "Account", path: "/settings/profile/edit" },
@@ -123,8 +124,10 @@ const ManusSettingsMobile = () => {
       label: "Appearance",
       trailing: themeMode === "dark" ? "Dark" : themeMode === "system" ? "System" : "Light",
       chevron: "none",
+      control: "switch",
       onClick: () => {
-        const next: ThemeMode = themeMode === "light" ? "dark" : themeMode === "dark" ? "system" : "light";
+        const next: ThemeMode =
+          themeMode === "light" ? "dark" : themeMode === "dark" ? "system" : "light";
         setThemeMode(next);
         setTheme(next);
       },
@@ -132,15 +135,28 @@ const ManusSettingsMobile = () => {
     { icon: Languages, label: "Language", trailing: langLabel, path: "/settings/language" },
   ];
 
-
   const linkRows: Row[] = [
-    { icon: Heart, label: "Rate this app", external: true, onClick: () => window.open("https://www.trustpilot.com/review/megsyai.com", "_blank", "noopener") },
-    { icon: HelpCircle, label: "Get help", external: true, onClick: () => window.open("https://help.megsyai.com", "_blank", "noopener") },
-    { icon: Info, label: "About us", external: true, onClick: () => window.open("https://about.megsyai.com", "_blank", "noopener") },
+    {
+      icon: Heart,
+      label: "Rate this app",
+      external: true,
+      onClick: () =>
+        window.open("https://www.trustpilot.com/review/megsyai.com", "_blank", "noopener"),
+    },
+    {
+      icon: HelpCircle,
+      label: "Get help",
+      external: true,
+      onClick: () => window.open("https://help.megsyai.com", "_blank", "noopener"),
+    },
+    {
+      icon: Info,
+      label: "About us",
+      external: true,
+      onClick: () => window.open("https://about.megsyai.com", "_blank", "noopener"),
+    },
     { icon: Asterisk, label: "Version", trailing: APP_VERSION, chevron: "none" },
   ];
-
-
 
   const renderRow = (row: Row, idx: number) => {
     const Icon = row.icon;
@@ -155,7 +171,21 @@ const ManusSettingsMobile = () => {
       >
         <Icon className="ms-row-icon" />
         <span className="ms-row-label">{row.label}</span>
-        {row.trailing && <span className="ms-row-trailing">{row.trailing}</span>}
+        {row.trailing && !row.control && <span className="ms-row-trailing">{row.trailing}</span>}
+        {row.control === "switch" && (
+          <span
+            aria-hidden="true"
+            className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border-2 border-transparent shadow-inner transition-colors ${
+              themeMode === "dark" ? "bg-primary" : "bg-muted-foreground/30"
+            }`}
+          >
+            <span
+              className={`block h-5 w-5 rounded-full bg-background shadow-md transition-transform ${
+                themeMode === "dark" ? "translate-x-5" : "translate-x-0"
+              }`}
+            />
+          </span>
+        )}
         {row.chevron === "none" ? null : row.external ? (
           <span className="ms-row-chev ms-row-ext">↗</span>
         ) : (
@@ -168,9 +198,14 @@ const ManusSettingsMobile = () => {
   return (
     <div className="ms-root" dir={"ltr"}>
       <style>{manusCss}</style>
-        <div className="ms-screen">
+      <div className="ms-screen">
         <header className="ms-header">
-          <button type="button" className="ms-hbtn" aria-label={authT("back")} onClick={() => navigate("/")}>
+          <button
+            type="button"
+            className="ms-hbtn"
+            aria-label={authT("back")}
+            onClick={() => navigate("/")}
+          >
             {isAr ? <ChevronRight className="ms-hicon" /> : <ChevronLeft className="ms-hicon" />}
           </button>
           <h1 className="ms-brand">megsy</h1>
@@ -178,9 +213,19 @@ const ManusSettingsMobile = () => {
 
         <main className="ms-body">
           {/* Profile */}
-          <button type="button" className="ms-card ms-profile" onClick={() => navigate("/settings/profile/edit")}>
+          <button
+            type="button"
+            className="ms-card ms-profile"
+            onClick={() => navigate("/settings/profile/edit")}
+          >
             {account.avatarUrl ? (
-              <img src={account.avatarUrl} alt="" className="ms-avatar" loading="lazy" decoding="async" />
+              <img
+                src={account.avatarUrl}
+                alt=""
+                className="ms-avatar"
+                loading="lazy"
+                decoding="async"
+              />
             ) : (
               <span className="ms-avatar ms-avatar-fallback">{initialsOf(userName)}</span>
             )}
@@ -202,7 +247,11 @@ const ManusSettingsMobile = () => {
               <Wallet className="ms-row-icon" />
               <span className="ms-row-label">{"Credits"}</span>
               <span className="ms-row-trailing">{credits ?? 0}</span>
-              {isAr ? <ChevronLeft className="ms-row-chev" /> : <ChevronRight className="ms-row-chev" />}
+              {isAr ? (
+                <ChevronLeft className="ms-row-chev" />
+              ) : (
+                <ChevronRight className="ms-row-chev" />
+              )}
             </button>
           </section>
 
@@ -212,7 +261,6 @@ const ManusSettingsMobile = () => {
           <section className="ms-card">{accountRows.map(renderRow)}</section>
           <section className="ms-card">{appearanceRows.map(renderRow)}</section>
           <section className="ms-card">{linkRows.map(renderRow)}</section>
-
 
           <section className="ms-card">
             <button type="button" className="ms-row" onClick={() => setLogoutOpen(true)}>
@@ -225,7 +273,11 @@ const ManusSettingsMobile = () => {
         </main>
 
         {logoutOpen && (
-          <div className="ms-confirm-scrim" role="presentation" onClick={() => setLogoutOpen(false)}>
+          <div
+            className="ms-confirm-scrim"
+            role="presentation"
+            onClick={() => setLogoutOpen(false)}
+          >
             <div
               className="ms-confirm"
               role="dialog"
@@ -236,10 +288,18 @@ const ManusSettingsMobile = () => {
               <h3 className="ms-confirm-title">Log out?</h3>
               <p className="ms-confirm-body">You'll need to sign in again to use Megsy.</p>
               <div className="ms-confirm-actions">
-                <button type="button" className="ms-confirm-btn" onClick={() => setLogoutOpen(false)}>
+                <button
+                  type="button"
+                  className="ms-confirm-btn"
+                  onClick={() => setLogoutOpen(false)}
+                >
                   Cancel
                 </button>
-                <button type="button" className="ms-confirm-btn ms-confirm-btn-primary" onClick={handleLogout}>
+                <button
+                  type="button"
+                  className="ms-confirm-btn ms-confirm-btn-primary"
+                  onClick={handleLogout}
+                >
                   Log out
                 </button>
               </div>
