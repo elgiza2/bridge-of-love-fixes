@@ -170,7 +170,11 @@ export default function MobileAuthFlow(p: Props) {
                           className="text-foreground/50 hover:text-foreground/80 transition-colors"
                           aria-label="toggle password"
                         >
-                          {p.showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          {p.showPassword ? (
+                            <EyeOff className="w-4 h-4" />
+                          ) : (
+                            <Eye className="w-4 h-4" />
+                          )}
                         </button>
                       </div>
                       <div className="flex justify-end mt-2 px-1">
@@ -193,7 +197,7 @@ export default function MobileAuthFlow(p: Props) {
                     <button
                       type="submit"
                       disabled={p.isSubmitting || !p.email}
-                      className={`w-full h-[52px] rounded-full flex items-center justify-center gap-2 active:scale-[0.985] transition-colors duration-300 disabled:opacity-50 ${
+                      className={`w-full h-[52px] rounded-[10px] flex items-center justify-center gap-2 active:scale-[0.985] transition-colors duration-300 disabled:opacity-50 ${
                         hasEmail
                           ? "theme-fixed bg-white text-background border border-white"
                           : "bg-transparent text-foreground border border-foreground/30"
@@ -201,7 +205,9 @@ export default function MobileAuthFlow(p: Props) {
                       style={{ fontSize: "15px", fontWeight: 600, letterSpacing: "0.1px" }}
                     >
                       {p.isSubmitting ? (
-                        <span className={`w-4 h-4 border-2 ${hasEmail ? "border-background" : "border-white"} border-t-transparent rounded-full animate-spin`} />
+                        <span
+                          className={`w-4 h-4 border-2 ${hasEmail ? "border-background" : "border-white"} border-t-transparent rounded-full animate-spin`}
+                        />
                       ) : (
                         <>
                           {p.showPasswordField ? authT("signIn") : authT("continue")}
@@ -211,7 +217,6 @@ export default function MobileAuthFlow(p: Props) {
                     </button>
                   );
                 })()}
-
               </form>
             </div>
           </motion.div>

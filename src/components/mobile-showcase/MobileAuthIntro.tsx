@@ -185,7 +185,7 @@ export default function MobileAuthIntro({
                 animate={{ opacity: 1, height: 54, marginBottom: 10 }}
                 exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                className="theme-fixed w-full flex items-center justify-center gap-2.5 rounded-full bg-white text-background active:scale-[0.985] overflow-hidden"
+                className="theme-fixed w-full flex items-center justify-center gap-2.5 rounded-[10px] bg-white text-background active:scale-[0.985] overflow-hidden"
                 style={{
                   fontSize: "15px",
                   fontWeight: 600,
@@ -220,7 +220,7 @@ export default function MobileAuthIntro({
           <motion.div
             layout
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="w-full h-[54px] rounded-full overflow-hidden"
+            className="w-full h-[54px] rounded-[10px] overflow-hidden"
             style={{
               background: "var(--overlay-white-06)",
               border: "1px solid var(--overlay-white-14)",

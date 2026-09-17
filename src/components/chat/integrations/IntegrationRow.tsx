@@ -19,7 +19,6 @@ function logoSources(item: Integration): string[] {
   return out;
 }
 
-
 export function IntegrationLogo({ item, size = 40 }: { item: Integration; size?: number }) {
   const sources = useMemo(() => logoSources(item), [item]);
   const [idx, setIdx] = useState(0);
@@ -40,7 +39,9 @@ export function IntegrationLogo({ item, size = 40 }: { item: Integration; size?:
           onError={() => setIdx((i) => i + 1)}
         />
       ) : (
-        <span className="text-[13px] font-semibold text-foreground/70">{item.name.slice(0, 1)}</span>
+        <span className="text-[13px] font-semibold text-foreground/70">
+          {item.name.slice(0, 1)}
+        </span>
       )}
     </span>
   );
@@ -60,13 +61,15 @@ export default function IntegrationRow({ item, connected, busy, onOpen }: RowPro
       type="button"
       onClick={onOpen}
       data-integration-row
-      className="flex w-full items-center gap-3 rounded-[14px] px-2.5 py-2.5 text-start transition-colors hover:bg-foreground/[0.04] active:bg-foreground/[0.06]"
-      style={{ border: 0, background: "transparent", minHeight: 56 }}
+      className="group flex w-full items-center gap-3 rounded-[14px] border border-transparent px-2.5 py-2.5 text-start transition-[background-color,border-color,transform] duration-150 hover:border-foreground/[0.06] hover:bg-foreground/[0.045] active:scale-[0.99] active:bg-foreground/[0.07]"
+      style={{ minHeight: 60 }}
       aria-label={item.name}
     >
       <IntegrationLogo item={item} />
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[14.5px] font-medium text-foreground">{item.name}</span>
+        <span className="block truncate text-[14.5px] font-semibold text-foreground">
+          {item.name}
+        </span>
         <span className="mt-0.5 block truncate text-[11.5px] leading-[1.5] text-foreground/65">
           {item.description}
         </span>
@@ -77,10 +80,9 @@ export default function IntegrationRow({ item, connected, busy, onOpen }: RowPro
         ) : connected ? (
           <Check style={{ width: 18, height: 18 }} className="text-primary" />
         ) : (
-          <ChevronRight className="h-[18px] w-[18px] rtl:rotate-180" />
+          <ChevronRight className="h-[18px] w-[18px] opacity-50 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" />
         )}
       </span>
     </button>
   );
 }
-

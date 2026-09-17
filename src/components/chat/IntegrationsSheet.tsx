@@ -43,8 +43,6 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "mcp", label: "MCP" },
 ];
 
-
-
 const SLIDE = { duration: 0.22, ease: [0.32, 0.72, 0, 1] as const };
 
 /**
@@ -86,7 +84,6 @@ export default function IntegrationsSheet({ open, onOpenChange }: Props) {
     const vh = window.innerHeight;
     const expandedH = Math.min(vh * 0.76, 620);
     setSize({ height: expandedH, collapsedY: 0 });
-
   }, [open]);
 
   const list = useMemo(() => {
@@ -96,9 +93,8 @@ export default function IntegrationsSheet({ open, onOpenChange }: Props) {
     return base.filter(
       (i) => i.name.toLowerCase().includes(q) || i.description.toLowerCase().includes(q),
     );
-  }, [query, tab]);
+  }, [query]);
 
-  
   const restList = list.filter((i) => !connected[i.app]);
 
   const toggle = async (item: Integration) => {
@@ -122,8 +118,8 @@ export default function IntegrationsSheet({ open, onOpenChange }: Props) {
         window.dispatchEvent(new CustomEvent("megsy:integrations-changed"));
         toast.success(`Connected ${item.name}`);
       }
-    } catch (e: any) {
-      toast.error(e?.message || "Couldn't complete the action");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Couldn't complete the action");
     } finally {
       setBusy(null);
     }
@@ -146,183 +142,191 @@ export default function IntegrationsSheet({ open, onOpenChange }: Props) {
           <Suspense fallback={null}>
             <DraggablePlusSheet
               height={size.height}
-               collapsedY={detail || apiDetail ? 0 : size.collapsedY}
+              collapsedY={detail || apiDetail ? 0 : size.collapsedY}
               bottomOffset={0}
               initialExpanded
-               view={apiDetail ? `api-${apiDetail.id}` : detail ? `detail-${detail.id}` : tab}
+              view={apiDetail ? `api-${apiDetail.id}` : detail ? `detail-${detail.id}` : tab}
               sheetKind="integrations"
               onClose={() => onOpenChange(false)}
             >
               <Suspense
                 fallback={
-                  <div className="flex min-h-[200px] items-center justify-center">
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-border border-t-foreground/60" />
+                  <div className="space-y-3 px-2 py-4" aria-busy="true">
+                    <div className="h-5 w-32 animate-pulse rounded-md bg-foreground/[0.08]" />
+                    <div className="h-11 animate-pulse rounded-[14px] bg-foreground/[0.06]" />
+                    <div className="space-y-2 pt-2">
+                      {[1, 2, 3, 4].map((row) => (
+                        <div
+                          key={row}
+                          className="h-14 animate-pulse rounded-[14px] bg-foreground/[0.045]"
+                        />
+                      ))}
+                    </div>
                   </div>
                 }
               >
-              <div dir={isArabic ? "rtl" : "ltr"} className="flex min-h-full flex-col">
-                <AnimatePresence mode="wait" initial={false}>
-                  {apiDetail ? (
-                    <motion.div
-                      key="api-detail"
-                      initial={{ x: -24, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      exit={{ x: -24, opacity: 0 }}
-                      transition={SLIDE}
-                      className="flex min-h-full flex-col px-1"
-                    >
-                      <ApiAppDetail
-                        app={apiDetail}
-                        onBack={() => setApiDetail(null)}
-                        onChanged={() => setApiReload((n) => n + 1)}
-                        onUse={() => onOpenChange(false)}
-                      />
-                    </motion.div>
-                  ) : detail ? (
-                    <motion.div
-                      key="detail"
-                      initial={{ x: -24, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      exit={{ x: -24, opacity: 0 }}
-                      transition={SLIDE}
-                      className="flex min-h-full flex-col"
-                    >
-                      <IntegrationDetail
-                        item={detail}
-                        connected={!!connected[detail.app]}
-                        busy={busy === detail.app}
-                        onBack={() => setDetail(null)}
-                        onToggle={() => void toggle(detail)}
+                <div dir={isArabic ? "rtl" : "ltr"} className="flex min-h-full flex-col">
+                  <AnimatePresence mode="wait" initial={false}>
+                    {apiDetail ? (
+                      <motion.div
+                        key="api-detail"
+                        initial={{ x: -24, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: -24, opacity: 0 }}
+                        transition={SLIDE}
+                        className="flex min-h-full flex-col px-1"
                       >
-                        {connected[detail.app] && (
-                          <AppActionsPanel
-                            slug={detail.pipedreamSlug || detail.app}
-                            appName={detail.name}
-                            onUse={() => onOpenChange(false)}
-                          />
-                        )}
-                      </IntegrationDetail>
-
-                    </motion.div>
-                   ) : (
-
-                    <motion.div
-                      key="list"
-                      initial={{ x: 24, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      exit={{ x: 24, opacity: 0 }}
-                      transition={SLIDE}
-                      className="flex min-h-full flex-col"
-                    >
-                      <div className="px-2 pb-3">
-                        <h2 className="text-start text-[19px] font-semibold tracking-tight text-foreground">
-                          {isArabic ? "التكاملات" : "Integrations"}
-                        </h2>
-                        <p className="mt-0.5 text-start text-[12.5px] text-muted-foreground">
-                          {isArabic
-                            ? "اربط تطبيقاتك ليستخدمها ميغسي داخل المحادثة"
-                            : "Connect your apps so Megsy can use them in chat"}
-                        </p>
-                      </div>
-
-                      <div data-connectors-search className="mx-2 flex h-11 items-center gap-2.5 rounded-full border border-border/70 bg-muted/40 px-4">
-                        <Search className="h-4 w-4 shrink-0 text-foreground/65" />
-                        <input
-                          value={query}
-                          onChange={(e) => setQuery(e.target.value)}
-                           placeholder={isArabic ? "ابحث عن تطبيق" : "Search for an app"}
-                          className="h-full w-full text-[14px] text-foreground outline-none placeholder:text-foreground/65"
-                          style={{
-                            border: 0,
-                            outline: "none",
-                            boxShadow: "none",
-                            background: "transparent",
-                            borderRadius: 0,
-                            padding: 0,
-                            height: "100%",
-                            minHeight: 0,
-                            WebkitAppearance: "none",
-                            appearance: "none",
-                            touchAction: "auto",
-                          }}
+                        <ApiAppDetail
+                          app={apiDetail}
+                          onBack={() => setApiDetail(null)}
+                          onChanged={() => setApiReload((n) => n + 1)}
+                          onUse={() => onOpenChange(false)}
                         />
-                      </div>
+                      </motion.div>
+                    ) : detail ? (
+                      <motion.div
+                        key="detail"
+                        initial={{ x: -24, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: -24, opacity: 0 }}
+                        transition={SLIDE}
+                        className="flex min-h-full flex-col"
+                      >
+                        <IntegrationDetail
+                          item={detail}
+                          connected={!!connected[detail.app]}
+                          busy={busy === detail.app}
+                          onBack={() => setDetail(null)}
+                          onToggle={() => void toggle(detail)}
+                        >
+                          {connected[detail.app] && (
+                            <AppActionsPanel
+                              slug={detail.pipedreamSlug || detail.app}
+                              appName={detail.name}
+                              onUse={() => onOpenChange(false)}
+                            />
+                          )}
+                        </IntegrationDetail>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="list"
+                        initial={{ x: 24, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: 24, opacity: 0 }}
+                        transition={SLIDE}
+                        className="flex min-h-full flex-col"
+                      >
+                        <div className="px-2 pb-3">
+                          <h2 className="text-start text-[19px] font-semibold tracking-tight text-foreground">
+                            {isArabic ? "التكاملات" : "Integrations"}
+                          </h2>
+                          <p className="mt-0.5 text-start text-[12.5px] text-muted-foreground">
+                            {isArabic
+                              ? "اربط تطبيقاتك ليستخدمها ميغسي داخل المحادثة"
+                              : "Connect your apps so Megsy can use them in chat"}
+                          </p>
+                        </div>
 
-                      <div className="mx-2 mt-3 flex gap-1 rounded-full bg-foreground/[0.045] p-1">
-                        {TABS.map((t) => (
-                          <button
-                            key={t.id}
-                            type="button"
-                            onClick={() => setTab(t.id)}
-                            className={`flex-1 rounded-full py-1.5 text-[13px] transition-colors ${
-                              tab === t.id
-                                ? "bg-background font-medium text-foreground"
-                                : "bg-transparent text-foreground/50"
-                            }`}
-                            style={{ border: 0 }}
-                          >
-                            {t.label}
-                          </button>
-                        ))}
-                      </div>
-
-                      <div className="mt-2 flex-1 px-1">
-                        {tab === "apis" ? (
-                          <ApiAppsTab
-                            query={query}
-                            reloadKey={apiReload}
-                            onOpen={(app) => setApiDetail(app)}
-                            onCreateFromChat={() => {
-                              window.dispatchEvent(
-                                new CustomEvent("megsy:composer-insert", {
-                                  detail: {
-                                    text: "Connect an API app for me: ",
-                                  },
-                                }),
-                              );
-                              onOpenChange(false);
+                        <div
+                          data-connectors-search
+                          className="mx-2 flex h-11 items-center gap-2.5 rounded-[14px] border border-border/70 bg-muted/40 px-3.5 shadow-sm"
+                        >
+                          <Search className="h-4 w-4 shrink-0 text-foreground/65" />
+                          <input
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            placeholder={isArabic ? "ابحث عن تطبيق" : "Search for an app"}
+                            className="h-full w-full text-[14px] text-foreground outline-none placeholder:text-foreground/65"
+                            style={{
+                              border: 0,
+                              outline: "none",
+                              boxShadow: "none",
+                              background: "transparent",
+                              borderRadius: 0,
+                              padding: 0,
+                              height: "100%",
+                              minHeight: 0,
+                              WebkitAppearance: "none",
+                              appearance: "none",
+                              touchAction: "auto",
                             }}
                           />
-                        ) : tab === "mcp" ? (
-                          <McpTab
-                            query={query}
-                            onCreateFromChat={() => {
-                              window.dispatchEvent(
-                                new CustomEvent("megsy:composer-insert", {
-                                  detail: {
-                                    text: "Add an MCP server for me: ",
-                                  },
-                                }),
-                              );
-                              onOpenChange(false);
-                            }}
-                          />
-                        ) : list.length === 0 ? (
-                          <EmptyConnectors label="No results" />
-                        ) : (
-                          <>
-                            <div className="mb-3">
-                              <AgentTools query={query} onOpenApp={(item) => setDetail(item)} />
-                            </div>
+                        </div>
 
+                        <div className="mx-2 mt-3 flex gap-1 rounded-[14px] bg-foreground/[0.045] p-1">
+                          {TABS.map((t) => (
+                            <button
+                              key={t.id}
+                              type="button"
+                              onClick={() => setTab(t.id)}
+                              className={`flex-1 rounded-full py-1.5 text-[13px] transition-colors ${
+                                tab === t.id
+                                  ? "bg-background font-medium text-foreground shadow-sm"
+                                  : "bg-transparent text-foreground/50"
+                              }`}
+                              style={{ border: 0 }}
+                            >
+                              {t.label}
+                            </button>
+                          ))}
+                        </div>
 
-                            {restList.map((item) => (
-                              <IntegrationRow
-                                key={item.id}
-                                item={item}
-                                connected={false}
-                                busy={busy === item.app}
-                                onOpen={() => setDetail(item)}
-                              />
-                            ))}
-                          </>
-                        )}
-                      </div>
+                        <div className="mt-2 flex-1 px-1">
+                          {tab === "apis" ? (
+                            <ApiAppsTab
+                              query={query}
+                              reloadKey={apiReload}
+                              onOpen={(app) => setApiDetail(app)}
+                              onCreateFromChat={() => {
+                                window.dispatchEvent(
+                                  new CustomEvent("megsy:composer-insert", {
+                                    detail: {
+                                      text: "Connect an API app for me: ",
+                                    },
+                                  }),
+                                );
+                                onOpenChange(false);
+                              }}
+                            />
+                          ) : tab === "mcp" ? (
+                            <McpTab
+                              query={query}
+                              onCreateFromChat={() => {
+                                window.dispatchEvent(
+                                  new CustomEvent("megsy:composer-insert", {
+                                    detail: {
+                                      text: "Add an MCP server for me: ",
+                                    },
+                                  }),
+                                );
+                                onOpenChange(false);
+                              }}
+                            />
+                          ) : list.length === 0 ? (
+                            <EmptyConnectors label="No results" />
+                          ) : (
+                            <>
+                              <div className="mb-3">
+                                <AgentTools query={query} onOpenApp={(item) => setDetail(item)} />
+                              </div>
 
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                              {restList.map((item) => (
+                                <IntegrationRow
+                                  key={item.id}
+                                  item={item}
+                                  connected={false}
+                                  busy={busy === item.app}
+                                  onOpen={() => setDetail(item)}
+                                />
+                              ))}
+                            </>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </Suspense>
             </DraggablePlusSheet>
           </Suspense>
