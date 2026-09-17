@@ -26,6 +26,7 @@ type Row = {
   path?: string;
   onClick?: () => void;
   trailing?: string;
+  control?: "switch";
 };
 type Group = { title: string; rows: Row[] };
 
@@ -44,7 +45,9 @@ export function DesktopSettingsHome() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user || cancelled) return;
       setUserEmail(user.email || "");
       const { data: profile } = await supabase
@@ -54,13 +57,14 @@ export function DesktopSettingsHome() {
         .single();
       if (profile && !cancelled) setPlan(profile.plan || "free");
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [account.kind]);
 
   const isFree = plan === "free";
 
-  const currentLangLabel =
-    AVAILABLE_LANGS.find((l) => l.code === lang)?.native ?? "English";
+  const currentLangLabel = AVAILABLE_LANGS.find((l) => l.code === lang)?.native ?? "English";
 
   const confirm = useConfirm();
 
@@ -93,7 +97,7 @@ export function DesktopSettingsHome() {
         { icon: (p) => <Brain {...p} />, label: tx("Memory"), path: "/settings/memory" },
         { icon: IntegrationsIcon, label: tx("Integrations"), path: "/chat?integrations=1" },
         { icon: IntegrationsIcon, label: tx("MCP Servers"), path: "/settings/mcp" },
-        
+
         {
           icon: (p) => <Globe {...p} />,
           label: tx("Language"),
@@ -111,14 +115,21 @@ export function DesktopSettingsHome() {
         {
           icon: (p) => (themeMode === "dark" ? <MoonIcon {...p} /> : <SunIcon {...p} />),
           label: tx("Appearance"),
-          trailing: themeMode === "dark" ? tx("Dark") : themeMode === "system" ? tx("System") : tx("Light"),
+          control: "switch",
+          trailing:
+            themeMode === "dark" ? tx("Dark") : themeMode === "system" ? tx("System") : tx("Light"),
           onClick: () => {
-            const next: ThemeMode = themeMode === "light" ? "dark" : themeMode === "dark" ? "system" : "light";
+            const next: ThemeMode =
+              themeMode === "light" ? "dark" : themeMode === "dark" ? "system" : "light";
             setThemeMode(next);
             setTheme(next);
           },
         },
-        { icon: (p) => <Info {...p} />, label: tx("About us"), onClick: () => window.open("https://about.megsyai.com", "_blank", "noopener") },
+        {
+          icon: (p) => <Info {...p} />,
+          label: tx("About us"),
+          onClick: () => window.open("https://about.megsyai.com", "_blank", "noopener"),
+        },
       ],
     },
   ];
@@ -130,7 +141,13 @@ export function DesktopSettingsHome() {
       <section className="flex flex-col items-center pt-4">
         <div className="h-[104px] w-[104px] rounded-full overflow-hidden ring-2 ring-foreground/20 shadow-[0_18px_50px_-12px_rgba(0,0,0,0.7)]">
           {avatarUrl ? (
-            <img loading="lazy" decoding="async" src={avatarUrl} alt="" className="h-full w-full object-cover" />
+            <img
+              loading="lazy"
+              decoding="async"
+              src={avatarUrl}
+              alt=""
+              className="h-full w-full object-cover"
+            />
           ) : (
             <OliveAvatar seed={userEmail || userName} className="h-full w-full" />
           )}
@@ -178,13 +195,31 @@ export function DesktopSettingsHome() {
                     onClick={() => (row.onClick ? row.onClick() : row.path && go(row.path))}
                     className="ds-row w-full flex items-center gap-3 px-5 py-3.5 text-left hover:bg-muted/60 active:bg-muted transition-colors"
                   >
-
                     <Icon className="w-[18px] h-[18px] text-foreground/75 shrink-0" />
-                    <span className="flex-1 text-[14.5px] font-medium text-foreground">{row.label}</span>
-                    {row.trailing && (
-                      <span className="text-[12.5px] text-foreground/55 shrink-0">{row.trailing}</span>
+                    <span className="flex-1 text-[14.5px] font-medium text-foreground">
+                      {row.label}
+                    </span>
+                    {row.trailing && !row.control && (
+                      <span className="text-[12.5px] text-foreground/55 shrink-0">
+                        {row.trailing}
+                      </span>
                     )}
-                    <ChevronRight className="w-4 h-4 text-foreground/65 shrink-0" />
+                    {row.control === "switch" ? (
+                      <span
+                        aria-hidden="true"
+                        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border-2 border-transparent shadow-inner transition-colors ${
+                          themeMode === "dark" ? "bg-primary" : "bg-muted-foreground/30"
+                        }`}
+                      >
+                        <span
+                          className={`block h-5 w-5 rounded-full bg-background shadow-md transition-transform ${
+                            themeMode === "dark" ? "translate-x-5" : "translate-x-0"
+                          }`}
+                        />
+                      </span>
+                    ) : (
+                      <ChevronRight className="w-4 h-4 text-foreground/65 shrink-0" />
+                    )}
                   </button>
                 );
               })}
@@ -198,11 +233,12 @@ export function DesktopSettingsHome() {
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-5 py-3.5 text-left hover:bg-muted/60 active:bg-muted transition-colors"
-      aria-label="Logout"
-    >
+              aria-label="Logout"
+            >
               <LogoutIcon className="w-[18px] h-[18px] text-destructive shrink-0" />
-              <span className="flex-1 text-[14.5px] font-medium text-destructive">{tx("Sign out")}</span>
-
+              <span className="flex-1 text-[14.5px] font-medium text-destructive">
+                {tx("Sign out")}
+              </span>
             </button>
           </div>
         </section>
@@ -225,6 +261,5 @@ const desktopRowCss = `
     background: hsl(var(--foreground) / 0.055);
   }
 `;
-
 
 export default DesktopSettingsHome;
