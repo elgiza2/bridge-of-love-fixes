@@ -2723,6 +2723,19 @@ const ChatPage = () => {
               "inset 0 1px 0 hsl(var(--foreground) / 0.06), 0 22px 60px -18px hsl(var(--foreground) / 0.18)",
           }}
         >
+          <div className="flex items-center px-2 pb-2 pt-1">
+            <span className="flex-1 text-center text-[15px] font-semibold tracking-tight">
+              {isArabic ? "إضافة للمحادثة" : "Add to chat"}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPlusMenuOpen(false)}
+              className="grid h-7 w-7 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-foreground/[0.06] hover:text-foreground"
+              aria-label={isArabic ? "اقفل القائمة" : "Close menu"}
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
           {renderPlusContent()}
         </motion.div>
       </>,
