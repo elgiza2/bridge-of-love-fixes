@@ -284,7 +284,7 @@ export const SERVICES_GUIDE: { name: string; desc: string }[] = [
 export const FAQS: { q: string; a: string }[] = [
   {
     q: "How does the introductory first month work?",
-    a: "Your first month of Pro uses the current introductory price shown above instead of the standard $20. Right after your payment clears we offer you a second month at the same intro price — one tap on Pay now and you are covered for two full months. After that, the plan renews at its standard monthly price and you can cancel anytime.",
+    a: "Eligible accounts can start with the 3-day trial shown above for $1. After the trial, Pro renews at the standard monthly price shown on the plan card. Any introductory monthly price is displayed separately, and you can cancel anytime from Billing.",
   },
   {
     q: "Can I change or cancel my plan anytime?",
