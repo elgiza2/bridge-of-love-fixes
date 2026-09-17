@@ -123,6 +123,28 @@ export default function AssistantMediaBlock({ msg, setMessages, setInput, setIsL
           mediaResults: liveResults,
         });
       }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "تعذر إنشاء الصورة";
+      const failedResults = liveResults.map((result) =>
+        result.status === "pending" || result.status === "running"
+          ? { ...result, status: "error" as const, error: message }
+          : result,
+      );
+      setMessages((prev) =>
+        prev.map((mm) =>
+          matches(mm)
+            ? { ...mm, mediaStatus: "done", mediaResults: failedResults, content: "تعذر إنشاء الصورة. حاول مرة أخرى." }
+            : mm,
+        ),
+      );
+      if (msg.id) {
+        void updateMessageMetadata(msg.id, {
+          mediaStatus: "done",
+          mediaResults: failedResults,
+          error: message,
+        });
+      }
+      toast.error(message);
     } finally {
       activeMediaGenerations.delete(generationKey);
       setIsLoading(false);

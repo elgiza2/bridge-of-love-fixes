@@ -285,9 +285,24 @@ export async function runSlidesTurn(args: RunSlidesTurnArgs): Promise<void> {
 
     const lang: "ar" | "en" = plan?.language || (isArabic ? "ar" : "en");
     const requestedCount = (() => {
-      const m = (userInput || "").match(/(\d{1,2})\s*(slides?|شريحة|شرائح|سلايد)/i);
-      const n = m ? parseInt(m[1], 10) : NaN;
-      return Number.isFinite(n) && n >= 3 && n <= 30 ? n : undefined;
+      const input = userInput || "";
+      const numeric = input.match(/(\d{1,2})\s*(slides?|شريحة|شرائح|سلايد)/i);
+      if (numeric) {
+        const n = parseInt(numeric[1], 10);
+        if (Number.isFinite(n) && n >= 3 && n <= 30) return n;
+      }
+      if (!/slides?|شريحة|شرائح|سلايد/i.test(input)) return undefined;
+      const words: Array<[RegExp, number]> = [
+        [/\b(?:three|ثلاث(?:ة)?|تلات(?:ة)?)\b/i, 3],
+        [/\b(?:four|أربع(?:ة)?|اربع(?:ة)?)\b/i, 4],
+        [/\b(?:five|خمس(?:ة)?|خمسة)\b/i, 5],
+        [/\b(?:six|ست(?:ة)?|ستة)\b/i, 6],
+        [/\b(?:seven|سبع(?:ة)?|سبعة)\b/i, 7],
+        [/\b(?:eight|ثمان(?:ية)?|تمانية)\b/i, 8],
+        [/\b(?:nine|تسع(?:ة)?|تسعة)\b/i, 9],
+        [/\b(?:ten|عشر(?:ة)?|عشرة)\b/i, 10],
+      ];
+      return words.find(([pattern]) => pattern.test(input))?.[1];
     })();
     // An explicit "5 slides" in the request always wins: the planner's outline
     // is only a suggestion, so it must not silently override the user's number.

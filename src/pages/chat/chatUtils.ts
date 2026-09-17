@@ -37,6 +37,20 @@ export const stripLeakedToolText = (value: string) =>
     .replace(/\$\{tool_code\}\s*/gi, "")
     .replace(/(?:^|\n)[^\n]*(?:print\s*\(\s*)?default_api\.[^\n]*(?:\n|$)/gi, "\n");
 
+// Long-running agents sometimes append their private work log after the
+// answer. It is not an answer and must never be shown to users (especially
+// browser URLs, file operations, or internal repair notes).
+const INTERNAL_TRACE_LINE =
+  /^\s*(?:Thought for\b|Starting task\b|I (?:will|am currently|have |need to |wrote |gathered |created |started )|The previous attempt\b|Checking (?:the |current )?(?:file|contents|page)\b|\[(?:Searched|Opened|Clicked|Scrolled|Saved)\b|(?:Opened|Saved) (?:the |file|https?:\/\/|file:\/\/)|Successfully extracted\b|Writing .*file\b|Creating .*page\b)/i;
+
+export const stripInternalAgentTrace = (value: string) =>
+  String(value || "")
+    .split("\n")
+    .filter((line) => !INTERNAL_TRACE_LINE.test(line))
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
 /**
  * The assistant must never assert anything about the user's plan, subscription
  * or paid access. Any sentence/line that does is removed before render, no
@@ -76,7 +90,7 @@ export const stripPlanClaims = (value: string) => {
 
 
 export const sanitizeLeakedToolText = (value: string) =>
-  stripPlanClaims(stripLeakedToolText(value)).trim();
+  stripInternalAgentTrace(stripPlanClaims(stripLeakedToolText(value)));
 
 export const makeLeakedToolStreamSanitizer = () => {
   let buffer = "";

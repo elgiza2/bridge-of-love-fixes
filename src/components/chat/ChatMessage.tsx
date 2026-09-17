@@ -1456,8 +1456,12 @@ const ChatMessage = ({
     looksLikeResearch &&
     (researchStatus === "running" || researchStatus === "error" || (!isStreaming && content.trim().length > 200));
 
+  // Internal tool/reasoning traces are never a user-facing answer. Keep the
+  // data available for diagnostics, but do not expose prompts, file operations,
+  // browser steps, or chain-of-thought in the chat transcript.
+  const exposeThinkingTrace = false;
   const showNarration =
-    role === "assistant" && isDeepResearch && narrations && narrations.length > 0;
+    exposeThinkingTrace && role === "assistant" && isDeepResearch && narrations && narrations.length > 0;
   const isResearchActive = !!isStreaming || (!!isThinking && !content);
   // Plain computation (not a hook): this code sits after an early return for
   // the group-chat branch, so hooks here would break hook ordering.
@@ -1478,7 +1482,7 @@ const ChatMessage = ({
   // Stay in the "thinking" state for the whole turn — including while the
   // model is picking / invoking a tool (reasoning tokens already streaming).
   const showLiveThinkingTrace =
-    role === "assistant" &&
+    exposeThinkingTrace && role === "assistant" &&
     (!!isThinking || (!!isStreaming && !content)) &&
     !showNarration &&
     !hasLearnCardContent;
@@ -1524,7 +1528,7 @@ const ChatMessage = ({
           reasoning &&
           !showNarration &&
           !showLiveThinkingTrace &&
-          (isStreaming || researchStatus === "running") && (
+          exposeThinkingTrace && (isStreaming || researchStatus === "running") && (
             <ThinkingTrace
               text={reasoning}
               status={searchStatus}
@@ -1537,7 +1541,7 @@ const ChatMessage = ({
         {role === "assistant" &&
           !isStreaming &&
           !showNarration &&
-          keepSettledTrace &&
+          exposeThinkingTrace && keepSettledTrace &&
           (!!thoughtsText || settledTraceSteps.length > 0) && (
             <ThinkingTrace variant="tools" text={thoughtsText} steps={settledTraceSteps} />
           )}

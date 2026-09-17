@@ -207,6 +207,12 @@ export function trackTikTokFunnelEvent(
   loadTikTokPixel();
   window.ttq?.track?.(event, properties, { event_id: eventId });
 
+  // Registration is emitted only by the browser after the authenticated
+  // account-created guard in App.tsx. Do not mirror it through the generic
+  // server endpoint: older deployments treated every funnel payload as a
+  // registration and inflated the TikTok dashboard with duplicate signups.
+  if (event === "CompleteRegistration") return;
+
   void supabase.auth.getUser().then(({ data: { user } }) =>
     supabase.functions
       .invoke("tiktok-purchase", {

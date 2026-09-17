@@ -68,6 +68,7 @@ const SUGGESTIONS = [
 export default function SkillsSettingsPage() {
   const navigate = useNavigate();
   const confirmDialog = useConfirm();
+  const isArabicUi = typeof document !== "undefined" && document.documentElement.lang.startsWith("ar");
 
   const location = useLocation();
   const { mySkills, librarySkills, loading, reload, toggleEnabled } = useSkills();
@@ -374,10 +375,12 @@ export default function SkillsSettingsPage() {
             </span>
             <span className="min-w-0 flex-1">
               <span className="block text-[16px] font-semibold text-[color:var(--mn-fg)]">
-                Create a skill with Megsy
+                {isArabicUi ? "اعمل مهارة مع ميغسي" : "Create a skill with Megsy"}
               </span>
               <span className="mt-1 block text-[12.5px] leading-snug text-[color:var(--mn-muted)]">
-                Describe the expert you need — instructions, triggers and tools are written for you.
+                {isArabicUi
+                  ? "اوصف الخبير اللي محتاجه — التعليمات والمحفزات والأدوات هتتكتب لك."
+                  : "Describe the expert you need — instructions, triggers and tools are written for you."}
               </span>
             </span>
             <ChevronRight className="mt-3.5 w-4 h-4 shrink-0 text-[color:var(--mn-muted)]" />
@@ -391,9 +394,11 @@ export default function SkillsSettingsPage() {
           <span className="w-9 h-9 rounded-[12px] grid place-items-center bg-[color:var(--mn-sep)]">
             <Blocks className="w-[18px] h-[18px] text-[color:var(--mn-fg)]" strokeWidth={1.8} />
           </span>
-          <span className="mt-2.5 block text-[13.5px] font-semibold text-[color:var(--mn-fg)]">Library</span>
+          <span className="mt-2.5 block text-[13.5px] font-semibold text-[color:var(--mn-fg)]">{isArabicUi ? "المكتبة" : "Library"}</span>
           <span className="block text-[11.5px] text-[color:var(--mn-muted)]">
-            {librarySkills.length > 0 ? `${librarySkills.length} ready-made` : "Official skills"}
+            {librarySkills.length > 0
+              ? isArabicUi ? `${librarySkills.length} جاهزة` : `${librarySkills.length} ready-made`
+              : isArabicUi ? "المهارات الرسمية" : "Official skills"}
           </span>
         </button>
 
@@ -408,8 +413,8 @@ export default function SkillsSettingsPage() {
               <Paperclip className="w-[18px] h-[18px] text-[color:var(--mn-fg)]" strokeWidth={1.8} />
             )}
           </span>
-          <span className="mt-2.5 block text-[13.5px] font-semibold text-[color:var(--mn-fg)]">Import</span>
-          <span className="block text-[11.5px] text-[color:var(--mn-muted)]">From a .zip file</span>
+          <span className="mt-2.5 block text-[13.5px] font-semibold text-[color:var(--mn-fg)]">{isArabicUi ? "استيراد" : "Import"}</span>
+          <span className="block text-[11.5px] text-[color:var(--mn-muted)]">{isArabicUi ? "من ملف .zip" : "From a .zip file"}</span>
         </button>
       </div>
 
@@ -418,8 +423,8 @@ export default function SkillsSettingsPage() {
         <div className="-mx-1 flex items-center gap-1.5 overflow-x-auto px-1 pb-0.5 no-scrollbar">
           {(
             [
-              { id: "all" as const, label: "All", count: mySkills.length },
-              { id: "enabled" as const, label: "Active", count: enabledCount },
+              { id: "all" as const, label: isArabicUi ? "الكل" : "All", count: mySkills.length },
+              { id: "enabled" as const, label: isArabicUi ? "شغال" : "Active", count: enabledCount },
             ]
           ).map((t) => (
             <button
@@ -452,25 +457,28 @@ export default function SkillsSettingsPage() {
             <Blocks className="w-5 h-5 text-[color:var(--mn-muted)]" />
           </div>
           <p className="text-[15px] font-semibold text-[color:var(--mn-fg)]">
-            {tab === "enabled" ? "No active skills" : query ? "No matches" : "No skills yet"}
+            {tab === "enabled"
+              ? isArabicUi ? "مفيش مهارات شغالة" : "No active skills"
+              : query ? (isArabicUi ? "مفيش نتائج" : "No matches")
+              : isArabicUi ? "لسه مفيش مهارات" : "No skills yet"}
           </p>
           <p className="text-[12.5px] mt-1.5 text-[color:var(--mn-muted)] max-w-[280px] mx-auto leading-relaxed">
             {tab === "enabled"
-              ? "Turn one on below, or create a new one."
-              : "Create your first expert, or add one from the official library."}
+              ? isArabicUi ? "شغّل واحدة من تحت أو اعمل مهارة جديدة." : "Turn one on below, or create a new one."
+              : isArabicUi ? "اعمل أول خبير ليك أو ضيف مهارة من المكتبة الرسمية." : "Create your first expert, or add one from the official library."}
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
             <button
               onClick={() => navigate("/settings/skills/new")}
               className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full text-[13px] font-semibold bg-primary text-primary-foreground"
             >
-              <Plus className="w-3.5 h-3.5" /> Create skill
+              <Plus className="w-3.5 h-3.5" /> {isArabicUi ? "اعمل مهارة" : "Create skill"}
             </button>
             <button
               onClick={() => navigate("/settings/skills/library")}
               className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full text-[13px] font-medium bg-[color:var(--mn-sep)] text-[color:var(--mn-fg)]"
             >
-              Official library
+              {isArabicUi ? "المكتبة الرسمية" : "Official library"}
             </button>
           </div>
         </div>
